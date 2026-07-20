@@ -346,7 +346,7 @@ var app = Vue.createApp({
       nameHint: nameHint,
       pkMode: pkMode, pkTime: pkTime, pkTargetStage: pkTargetStage, pkWin: false,
 
-      stageIndex: 0, stagePairs: [], quizIndex: 0, quizOptions: [], correctAnswer: '',
+      stageIndex: 0, retryStageIndex: 0, stagePairs: [], quizIndex: 0, quizOptions: [], correctAnswer: '',
       stageCorrect: 0, totalCorrect: 0, totalAnswered: 0,
       lives: 3, maxLives: 3, wrongPair: null, selectedWrong: '', quizLocked: false, cueShake: false,
 
@@ -399,7 +399,7 @@ var app = Vue.createApp({
       var bank=window.WORD_BANK;
       if(!bank||!bank.easy||bank.easy.length<3){ bank={easy:[{id:1,pair:{left:'太阳',right:'冰淇淋'}},{id:2,pair:{left:'猫咪',right:'雨伞'}},{id:3,pair:{left:'自行车',right:'背包'}},{id:4,pair:{left:'海滩',right:'排球'}},{id:5,pair:{left:'图书馆',right:'咖啡杯'}}],medium:[{id:1,pair:{left:'恐龙',right:'奶茶'}},{id:2,pair:{left:'袜子',right:'汉堡'}},{id:3,pair:{left:'钢琴',right:'仙人掌'}},{id:4,pair:{left:'手机',right:'皮划艇'}},{id:5,pair:{left:'月亮',right:'拖鞋'}},{id:6,pair:{left:'冰箱',right:'风筝'}},{id:7,pair:{left:'微波炉',right:'雨伞'}}],hard:[{id:1,pair:{left:'潜水艇',right:'长颈鹿'}},{id:2,pair:{left:'灭火器',right:'棒棒糖'}},{id:3,pair:{left:'螺丝刀',right:'棉花糖'}},{id:4,pair:{left:'埃菲尔铁塔',right:'水蜜桃'}},{id:5,pair:{left:'垃圾桶',right:'红领巾'}},{id:6,pair:{left:'坦克',right:'口红'}},{id:7,pair:{left:'手术刀',right:'气球'}},{id:8,pair:{left:'火箭',right:'蒲公英'}},{id:9,pair:{left:'棺材',right:'彩虹'}}]}; }
       this.wordBank=bank;
-      this.stageIndex=0; this.totalCorrect=0; this.totalAnswered=0; this.lives=this.maxLives;
+      this.stageIndex=this.retryStageIndex; this.retryStageIndex=0; this.totalCorrect=0; this.totalAnswered=0; this.lives=this.maxLives;
       this.wrongPair=null; this.selectedWrong=''; this.quizLocked=false; this.cueShake=false;
       this.won=false; this.quizStartTime=0; this.totalTime=0; this.currentGameId=uid();
       this.loadStage();
@@ -500,7 +500,7 @@ var app = Vue.createApp({
         if(this.pkMode){this.pkWin=record.time<this.pkTime;}
       }
 
-      this.brainExpanded=true; this.currentPage='result';
+      this.retryStageIndex=this.stageIndex; this.brainExpanded=true; this.currentPage='result';
     },
 
     shareResult: function(){
