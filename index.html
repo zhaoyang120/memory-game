@@ -3,528 +3,1314 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>联想脑王挑战</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config = {
-  theme: {
-    extend: {
-      colors: { brand: { yellow:'#FFD700', purple:'#A855F7', blue:'#3B82F6', pink:'#EC4899', orange:'#F97316', cyan:'#06B6D4' } },
-      animation: {
-        'float':'float 2.6s ease-in-out infinite','pulse-fast':'pulse 0.5s ease-in-out infinite',
-        'fade-up':'fadeUp 0.5s ease','pop':'pop 0.3s ease','shake':'shake 0.5s ease',
-        'bar-blink':'barBlink 0.5s ease-in-out infinite','glow':'glow 2s ease-in-out infinite',
-      },
-      keyframes: {
-        float:{'0%,100%':{transform:'translateY(0)'},'50%':{transform:'translateY(-8px)'}},
-        fadeUp:{from:{opacity:'0',transform:'translateY(26px)'},to:{opacity:'1',transform:'translateY(0)'}},
-        pop:{'0%':{opacity:'0',transform:'scale(0.25)'},'60%':{opacity:'1',transform:'scale(1.12)'},'100%':{opacity:'1',transform:'scale(1)'}},
-        shake:{'0%,100%':{transform:'translateX(0)'},'15%':{transform:'translateX(-9px)'},'35%':{transform:'translateX(9px)'},'55%':{transform:'translateX(-6px)'},'75%':{transform:'translateX(6px)'}},
-        barBlink:{'0%,100%':{opacity:'1'},'50%':{opacity:'0.3'}},
-        glow:{'0%,100%':{boxShadow:'0 0 20px rgba(168,85,247,0.3)'},'50%':{boxShadow:'0 0 35px rgba(168,85,247,0.6)'}},
-      }
-    }
-  }
-}
-</script>
+<title>社群最强大脑：瞬时记忆挑战</title>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow-x:hidden;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-font-smoothing:antialiased;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans SC',sans-serif}
-body{background:linear-gradient(160deg,#0F0F1A 0%,#1A1025 30%,#0F1A2E 60%,#0F0F1A 100%);min-height:100dvh}
-body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 60% 40% at 50% 0%,rgba(168,85,247,0.10) 0%,transparent 55%),radial-gradient(ellipse 50% 35% at 80% 100%,rgba(236,72,153,0.07) 0%,transparent 50%),radial-gradient(ellipse 40% 30% at 20% 80%,rgba(59,130,246,0.06) 0%,transparent 50%)}
-#app{position:relative;z-index:1}
-.page-enter-active{animation:fadeUp 0.45s ease}
-.btn-press:active{transform:scale(0.92)!important;transition:transform 0.1s ease!important}
-.progress-bar{transition:width 0.15s linear;will-change:width}
-.no-scrollbar::-webkit-scrollbar{display:none}
-.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
-.option-card{transition:all 0.15s ease}
-.option-card:active{transform:scale(0.94)}
-.toast-enter{animation:pop 0.35s ease}
-.brain-active{animation:glow 2s ease-in-out infinite}
-[v-cloak]{display:none!important}
+/* ============================================================
+   CSS Reset & Design Tokens
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-deep:    #06060f;
+  --bg-card:    #0f0f23;
+  --bg-surface: #16163a;
+  --border:     rgba(99, 102, 241, 0.30);
+  --border-glow: rgba(99, 102, 241, 0.55);
+  --primary:    #6366f1;
+  --primary-lt: #818cf8;
+  --accent:     #f43f5e;
+  --accent-lt:  #fb7185;
+  --gold:       #f59e0b;
+  --success:    #22c55e;
+  --text:       #e8ecf4;
+  --text-dim:   #94a3b8;
+  --text-muted: #5b6b88;
+  --radius:     18px;
+  --radius-sm:  12px;
+  --font-mono:  'SF Mono', 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+  --font-sans:  -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+                'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--font-sans);
+  background: var(--bg-deep);
+  color: var(--text);
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 0%,   rgba(99,102,241,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 100%, rgba(244,63,94,0.07)  0%, transparent 55%),
+    radial-gradient(ellipse 40% 35% at 20% 80%, rgba(34,197,94,0.05)   0%, transparent 55%);
+}
+
+/* ============================================================
+   App Shell
+   ============================================================ */
+.app {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 430px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: 20px 16px 28px;
+  display: flex; flex-direction: column;
+}
+
+/* ============================================================
+   Page switching
+   ============================================================ */
+.page { display: none; flex-direction: column; flex: 1; }
+.page.active { display: flex; }
+
+/* ============================================================
+   HOME PAGE
+   ============================================================ */
+.home-page {
+  align-items: center; justify-content: flex-start;
+  gap: 20px; padding-top: 28px;
+  animation: fadeUp 0.55s ease;
+}
+
+.brand-block { text-align: center; }
+
+.brand-block .emoji {
+  display: block; font-size: 52px; margin-bottom: 10px;
+  animation: float 2.6s ease-in-out infinite;
+}
+
+.brand-block h1 {
+  font-size: 26px; font-weight: 850; letter-spacing: 0.5px;
+  line-height: 1.35;
+  background: linear-gradient(135deg, var(--primary-lt), #c084fc, var(--accent-lt));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.brand-block .tagline {
+  margin-top: 4px; font-size: 13px; color: var(--text-dim); letter-spacing: 2px;
+}
+
+/* ── nickname ── */
+.nickname-wrap {
+  width: 100%; max-width: 290px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+
+.nickname-wrap .nick-label {
+  font-size: 13px; font-weight: 700; color: var(--text-dim);
+  display: flex; align-items: center; gap: 6px;
+}
+
+.nickname-row {
+  display: flex; gap: 8px;
+}
+
+.nickname-input {
+  flex: 1; height: 48px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 15px; font-weight: 600;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  font-family: var(--font-sans);
+}
+
+.nickname-input::placeholder { color: var(--text-muted); font-weight: 400; }
+.nickname-input:focus {
+  border-color: var(--primary-lt);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+}
+
+.wechat-badge-inline {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 11px; color: var(--success);
+  background: rgba(34,197,94,0.12);
+  padding: 4px 10px; border-radius: 20px;
+  white-space: nowrap; font-weight: 600;
+  animation: fadeUp 0.4s ease;
+}
+
+.start-btn {
+  width: 100%; max-width: 290px;
+  padding: 16px 0;
+  border: none; border-radius: 50px;
+  background: linear-gradient(135deg, var(--primary), #8b5cf6);
+  color: #fff; font-size: 18px; font-weight: 750; letter-spacing: 2px;
+  cursor: pointer;
+  box-shadow: 0 6px 28px rgba(99,102,241,0.35);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.start-btn:active { transform: scale(0.96); box-shadow: 0 4px 18px rgba(99,102,241,0.45); }
+
+.level-preview {
+  width: 100%; max-width: 290px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+.level-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+}
+
+.level-row .lv-icon  { font-size: 22px; flex-shrink: 0; }
+.level-row .lv-info  { flex: 1; }
+.level-row .lv-title { font-weight: 700; }
+.level-row .lv-desc  { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+.level-row .lv-tag   { font-size: 11px; color: var(--text-muted); background: var(--bg-surface); padding: 3px 10px; border-radius: 12px; white-space: nowrap; }
+
+/* ── leaderboard ── */
+.lb-section {
+  width: 100%; max-width: 290px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+.lb-header {
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.lb-header .lb-title {
+  font-size: 14px; font-weight: 750; color: var(--text-dim);
+  display: flex; align-items: center; gap: 6px;
+}
+
+.lb-header .lb-clear {
+  font-size: 11px; color: var(--text-muted);
+  background: none; border: none; cursor: pointer;
+  padding: 4px 10px; border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.lb-header .lb-clear:active { background: rgba(244,63,94,0.15); color: var(--accent); }
+
+.lb-list {
+  display: flex; flex-direction: column;
+  max-height: 220px; overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.lb-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  font-size: 13px;
+}
+
+.lb-item .lb-rank {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; flex-shrink: 0;
+}
+.lb-item .lb-rank.r1 { background: rgba(245,158,11,0.25);  color: var(--gold); }
+.lb-item .lb-rank.r2 { background: rgba(148,163,184,0.18); color: #c0c8d4; }
+.lb-item .lb-rank.r3 { background: rgba(180,130,80,0.2);   color: #d4a860; }
+.lb-item .lb-rank.rn { background: rgba(255,255,255,0.04); color: var(--text-dim); }
+
+.lb-item .lb-name  { flex: 1; font-weight: 650; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lb-item .lb-info  { text-align: right; flex-shrink: 0; }
+.lb-item .lb-info .lb-time { font-weight: 700; color: var(--primary-lt); font-family: var(--font-mono); font-size: 13px; }
+.lb-item .lb-info .lb-meta { font-size: 10px; color: var(--text-muted); }
+
+.lb-empty { text-align: center; font-size: 13px; color: var(--text-muted); padding: 20px 0; }
+
+.home-footer {
+  text-align: center; font-size: 11px; color: var(--text-muted); letter-spacing: 2px;
+  margin-top: auto; padding-top: 10px;
+}
+
+/* ============================================================
+   GAME PAGE
+   ============================================================ */
+.game-topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 4px 18px;
+}
+
+.level-badge {
+  font-size: 14px; font-weight: 700; color: var(--text-dim);
+  background: var(--bg-card); padding: 7px 16px;
+  border-radius: 22px; border: 1px solid var(--border);
+}
+
+.hearts-row { display: flex; gap: 5px; }
+.heart-icon { font-size: 24px; transition: all 0.35s ease; }
+.heart-icon.broken { opacity: 0.18; transform: scale(0.65); filter: grayscale(1); }
+
+.game-main {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 26px;
+}
+
+/* ── countdown ring ── */
+.ring-wrap { position: relative; width: 112px; height: 112px; }
+.ring-wrap svg { transform: rotate(-90deg); width: 112px; height: 112px; }
+.ring-wrap .ring-bg { fill: none; stroke: var(--bg-surface); stroke-width: 6; }
+.ring-wrap .ring-fg {
+  fill: none; stroke: var(--primary-lt); stroke-width: 6;
+  stroke-linecap: round; transition: stroke-dashoffset 0.12s linear;
+}
+.ring-text {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 34px; font-weight: 850; font-family: var(--font-mono); color: var(--primary-lt);
+}
+
+/* ── memory number ── */
+.mem-num {
+  font-size: 44px; font-weight: 900; font-family: var(--font-mono);
+  letter-spacing: 14px;
+  color: #fff;
+  text-shadow: 0 0 38px rgba(129,140,248,0.65), 0 0 70px rgba(99,102,241,0.3);
+  min-height: 56px; display: flex; align-items: center; justify-content: center;
+  animation: numPop 0.32s ease;
+}
+.mem-num.hidden { display: none; }
+
+.hint-line { font-size: 14px; color: var(--text-dim); text-align: center; min-height: 22px; }
+
+/* ── input block ── */
+.input-block { display: none; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
+.input-block.on { display: flex; }
+
+.answer-box {
+  width: 100%; max-width: 280px; height: 54px;
+  background: var(--bg-surface); border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 850; font-family: var(--font-mono);
+  letter-spacing: 8px; color: var(--text);
+}
+.answer-box .caret {
+  display: inline-block; width: 2px; height: 32px; background: var(--primary-lt);
+  animation: blinkCaret 1s step-end infinite;
+}
+
+/* ── numpad ── */
+.pad {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 10px; width: 100%; max-width: 280px;
+}
+.pad button {
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 22px; font-weight: 750;
+  cursor: pointer;
+  transition: all 0.14s ease;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.pad button:active { background: var(--primary); border-color: var(--primary-lt); transform: scale(0.92); }
+
+.pad .btn-del  { color: var(--accent); font-size: 18px; }
+.pad .btn-go   {
+  font-size: 16px; font-weight: 850; color: #fff;
+  background: var(--primary); border-color: var(--primary-lt);
+  grid-column: span 2; aspect-ratio: auto; height: 54px; letter-spacing: 2px;
+}
+
+/* ── per-question result banner ── */
+.q-result {
+  display: none; align-items: center; gap: 10px;
+  padding: 14px 20px; border-radius: var(--radius-sm);
+  font-size: 15px; font-weight: 750;
+  animation: fadeUp 0.3s ease;
+}
+.q-result.on { display: flex; }
+.q-result.correct { background: rgba(34,197,94,0.12); color: var(--success); border: 1px solid rgba(34,197,94,0.3); }
+.q-result.wrong   { background: rgba(244,63,94,0.12);  color: var(--accent);   border: 1px solid rgba(244,63,94,0.3); }
+
+/* ============================================================
+   RESULT PAGE
+   ============================================================ */
+.result-page {
+  align-items: center; padding-top: 20px; gap: 14px;
+  animation: fadeUp 0.5s ease;
+}
+
+.big-emoji { font-size: 54px; animation: float 2.6s ease-in-out infinite; }
+.title-line {
+  font-size: 20px; font-weight: 850;
+  background: linear-gradient(135deg, var(--gold), var(--accent-lt));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.share-card {
+  width: 100%;
+  background: linear-gradient(150deg, #111133, #0d0d28);
+  border: 1px solid var(--border-glow);
+  border-radius: var(--radius);
+  padding: 20px 18px;
+  display: flex; flex-direction: column; gap: 12px;
+  box-shadow: 0 12px 40px rgba(99,102,241,0.14);
+}
+
+.share-card .card-header {
+  text-align: center; font-size: 13px; font-weight: 750; color: var(--primary-lt); letter-spacing: 2px;
+}
+
+.share-card .card-player {
+  text-align: center; font-size: 15px; font-weight: 750; color: #fff;
+  padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.share-card .card-player .wx-tag {
+  display: inline-block;
+  font-size: 11px; color: var(--success); background: rgba(34,197,94,0.12);
+  padding: 2px 8px; border-radius: 8px;
+  margin-left: 6px; font-weight: 600;
+}
+
+.stats-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+}
+.stat-cell {
+  text-align: center; padding: 12px 4px;
+  background: rgba(255,255,255,0.025); border-radius: var(--radius-sm);
+}
+.stat-cell .big   { font-size: 25px; font-weight: 900; font-family: var(--font-mono); color: #fff; }
+.stat-cell .label { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+
+.rank-strip {
+  text-align: center; padding: 12px; border-radius: 26px;
+  font-size: 16px; font-weight: 800; letter-spacing: 2px;
+}
+.rank-strip.sss  { background: rgba(245,158,11,0.18);  color: var(--gold); }
+.rank-strip.ss   { background: rgba(99,102,241,0.18);   color: var(--primary-lt); }
+.rank-strip.s    { background: rgba(129,140,248,0.12);  color: #a5b4fc; }
+.rank-strip.a    { background: rgba(148,163,184,0.10);  color: var(--text-dim); }
+
+.share-card .watermark { text-align: center; font-size: 10px; color: var(--text-muted); letter-spacing: 2px; }
+
+/* ── QR code section ── */
+.qr-section {
+  width: 100%;
+  background: linear-gradient(150deg, #111133, #0d0d28);
+  border: 1px solid var(--border-glow);
+  border-radius: var(--radius);
+  padding: 20px 18px 16px;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 12px;
+  box-shadow: 0 12px 40px rgba(99,102,241,0.14);
+}
+
+.qr-section .qr-title {
+  font-size: 14px; font-weight: 750; color: var(--gold);
+  text-align: center; letter-spacing: 1px;
+}
+
+.qr-img-wrap {
+  width: 170px; height: 170px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+  padding: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.qr-img-wrap img,
+.qr-img-wrap canvas {
+  width: 100%; height: 100%;
+  display: block;
+}
+
+.qr-section .qr-hint {
+  font-size: 13px; color: var(--text-dim);
+  text-align: center; line-height: 1.6;
+}
+
+.qr-section .qr-highlight {
+  display: inline-block;
+  color: var(--accent-lt); font-weight: 750;
+  background: rgba(244,63,94,0.1);
+  padding: 3px 10px; border-radius: 12px;
+  margin-top: 4px;
+}
+
+.result-rank-snippet {
+  width: 100%; text-align: center;
+  font-size: 13px; color: var(--text-dim);
+  padding: 8px; background: rgba(245,158,11,0.06);
+  border-radius: var(--radius-sm);
+}
+
+.act-row { display: flex; gap: 10px; width: 100%; }
+.btn {
+  flex: 1; padding: 14px; border-radius: 50px; border: none;
+  font-size: 15px; font-weight: 750; cursor: pointer;
+  transition: all 0.18s ease; letter-spacing: 1px;
+  text-align: center;
+}
+.btn:active { transform: scale(0.95); }
+.btn-solid  { background: var(--primary); color: #fff; }
+.btn-ghost  { background: transparent; border: 1px solid var(--border); color: var(--text); }
+
+/* ============================================================
+   Toast
+   ============================================================ */
+.toast-overlay {
+  position: fixed; inset: 0; z-index: 200; pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.22s ease;
+}
+.toast-overlay.show { opacity: 1; }
+.toast-icon { font-size: 80px; animation: toastPop 0.55s ease; }
+
+/* ============================================================
+   Animations
+   ============================================================ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(26px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+@keyframes numPop {
+  from { opacity: 0; transform: scale(0.75); letter-spacing: 26px; }
+  to   { opacity: 1; transform: scale(1);    letter-spacing: 14px; }
+}
+@keyframes blinkCaret {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+@keyframes toastPop {
+  0%   { opacity: 0; transform: scale(0.25); }
+  50%  { opacity: 1; transform: scale(1.18); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  15%      { transform: translateX(-9px); }
+  35%      { transform: translateX(9px); }
+  55%      { transform: translateX(-6px); }
+  75%      { transform: translateX(6px); }
+}
+.shake { animation: shake 0.5s ease; }
+
+@media (max-width: 360px) {
+  .brand-block h1 { font-size: 21px; }
+  .mem-num { font-size: 36px; letter-spacing: 10px; }
+  .pad { gap: 8px; }
+  .pad button { font-size: 20px; }
+}
 </style>
 </head>
 <body>
 
-<div id="app" v-cloak>
+<div class="app" id="app">
 
-  <!-- ================================================================
-       HOME PAGE
-       ================================================================ -->
-  <div v-if="currentPage==='home'" class="page-enter-active w-full max-w-[430px] mx-auto min-h-dvh flex flex-col items-center px-4 pt-8 pb-6 gap-5">
-
-    <!-- PK Banner -->
-    <div v-if="pkMode" class="w-full bg-gradient-to-r from-pink-600/30 via-purple-600/30 to-blue-600/30 border-2 border-pink-500/40 rounded-2xl p-4 text-center animate-pulse-fast relative">
-      <button @click="dismissPk" class="absolute top-2 right-3 w-7 h-7 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white/60 text-sm hover:bg-white/20">✕</button>
-      <div class="text-3xl mb-1">📜</div>
-      <div class="text-base font-extrabold text-pink-200">好友挑战书</div>
-      <div class="text-sm text-white/80 mt-1 leading-relaxed">
-        你的好友闯到了 <span class="text-yellow-300 font-bold text-lg">{{ stageLabel(pkTargetStage) }}</span> 耗时
-        <span class="text-yellow-300 font-bold text-lg">{{ pkTime }} 秒</span>，你能击败TA吗？
-      </div>
-      <div class="text-xs text-white/40 mt-2">🎯 目标：闯过【{{ stageLabel(pkTargetStage) }}】且更快！</div>
+  <!-- =================== HOME =================== -->
+  <div class="page home-page active" id="pg-home">
+    <div class="brand-block">
+      <span class="emoji">🧠</span>
+      <h1>社群最强大脑</h1>
+      <p class="tagline">⚡ 瞬时记忆挑战 ⚡</p>
     </div>
 
-    <!-- Brand -->
-    <div class="text-center">
-      <div class="text-5xl mb-2 animate-float">🧠</div>
-      <h1 class="text-[28px] font-extrabold leading-tight bg-gradient-to-r from-yellow-300 via-purple-400 to-pink-400 bg-clip-text text-transparent">联想脑王挑战</h1>
-      <p class="text-xs text-white/40 tracking-[3px] mt-1">⚡ 瞬时记忆 · 三关连闯 ⚡</p>
-    </div>
-
-    <!-- Stage preview -->
-    <div class="w-full flex items-center justify-center gap-2 py-2">
-      <div class="flex items-center gap-1.5 px-3 py-2 rounded-full bg-emerald-500/10 border border-emerald-400/20"><span>🌱</span><span class="text-xs font-bold text-emerald-300">3组·8s</span></div>
-      <span class="text-white/20">→</span>
-      <div class="flex items-center gap-1.5 px-3 py-2 rounded-full bg-amber-500/10 border border-amber-400/20"><span>⚡</span><span class="text-xs font-bold text-amber-300">5组·17s</span></div>
-      <span class="text-white/20">→</span>
-      <div class="flex items-center gap-1.5 px-3 py-2 rounded-full bg-red-500/10 border border-red-400/20"><span>🔥</span><span class="text-xs font-bold text-red-300">7组·20s</span></div>
-    </div>
-    <p class="text-xs text-white/30 -mt-2">连续闯过 3 关，共 15 组词对 → 成为联想脑王！</p>
-
-    <!-- Nickname input -->
-    <div class="w-full flex flex-col gap-1.5">
-      <label class="text-xs font-bold text-white/40 flex items-center gap-1.5">
+    <!-- nickname -->
+    <div class="nickname-wrap">
+      <label class="nick-label" for="nickname-input">
         💬 你的微信名称
-        <span v-if="isWeChat" class="text-[10px] text-green-400 bg-green-400/10 px-2 py-0.5 rounded-full font-bold">✅ 微信环境</span>
+        <span id="wx-detect-badge" style="display:none;"></span>
       </label>
-      <div class="flex gap-2">
-        <input
-          v-model="playerName"
-          type="text"
-          :placeholder="isWeChat ? '点击输入你的微信昵称' : '请输入你的昵称'"
-          maxlength="16"
-          class="flex-1 h-12 px-4 rounded-full bg-white/5 border-2 border-white/10 text-white text-sm font-bold text-center placeholder-white/20 outline-none transition-all duration-200 focus:border-purple-400/50 focus:bg-white/[0.07]"
-        />
+      <div class="nickname-row">
+        <input type="text" class="nickname-input" id="nickname-input"
+               placeholder="请输入微信昵称" maxlength="20" autocomplete="name">
       </div>
-      <div v-if="nameHint" class="text-[11px] text-green-400/60 text-center">{{ nameHint }}</div>
-    </div>
-
-    <!-- Start Button -->
-    <button @click="startGame" class="btn-press w-full py-4 rounded-full text-lg font-extrabold tracking-[3px] text-white bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 shadow-lg shadow-purple-500/30 transition-all duration-200">⚡ 开 始 闯 关 ⚡</button>
-
-    <!-- History Leaderboard -->
-    <div class="w-full bg-white/5 rounded-2xl border border-white/10 overflow-hidden">
-      <div @click="showHistory=!showHistory" class="flex items-center justify-between p-4 cursor-pointer">
-        <span class="text-sm font-extrabold text-white/60">🏅 历史战绩排行榜</span>
-        <div class="flex items-center gap-2">
-          <button v-if="history.length>0" @click.stop="clearHistory()" class="text-xs text-white/30 px-2 py-1 rounded-lg border border-white/10 hover:text-red-400">清空</button>
-          <span class="text-white/40 text-sm transition-transform duration-200" :class="showHistory?'rotate-180':''">▼</span>
-        </div>
-      </div>
-      <div v-if="showHistory" class="px-4 pb-4">
-        <div v-if="history.length===0" class="text-center text-white/30 text-sm py-6">还没有挑战记录，快来争第一 🚀</div>
-        <div v-else class="flex flex-col max-h-[220px] overflow-y-auto no-scrollbar">
-          <div v-for="(rec,idx) in rankedHistory" :key="rec.id" class="flex items-center gap-3 py-2.5 border-b border-white/5 last:border-0">
-            <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-extrabold flex-shrink-0" :class="idx===0?'bg-yellow-500/25 text-yellow-400':idx===1?'bg-gray-400/20 text-gray-300':idx===2?'bg-orange-700/25 text-orange-400':'bg-white/5 text-white/40'">{{ idx===0?'👑':idx===1?'🥈':idx===2?'🥉':idx+1 }}</div>
-            <div class="flex-1 min-w-0"><div class="text-sm font-bold truncate text-white">{{ rec.name||'匿名玩家' }} · {{ rec.title }}</div><div class="text-[11px] text-white/30">闯到 {{ stageLabel(rec.reachedStage) }} · {{ rec.date }}</div></div>
-            <div class="text-right flex-shrink-0"><div class="text-sm font-extrabold text-purple-300 font-mono">{{ rec.time }}s</div><div class="text-[11px] text-white/40">{{ rec.correct }}/{{ rec.total }} 正确</div></div>
-          </div>
-        </div>
+      <div id="nick-hint" style="display:none;font-size:11px;color:var(--text-muted);text-align:center;">
+        💡 已自动读取您上次填写的昵称
       </div>
     </div>
 
-    <p class="text-[11px] text-white/20 tracking-[2px] mt-auto">❤️ 联想脑王挑战 · 三关连闯</p>
+    <button class="start-btn" id="btn-start" onclick="launchGame()">开 始 挑 战</button>
+
+    <div class="level-preview">
+      <div class="level-row">
+        <span class="lv-icon">🌱</span>
+        <div class="lv-info"><div class="lv-title">第 1 关</div><div class="lv-desc">5 位随机数字</div></div>
+        <span class="lv-tag">⏱ 4s</span>
+      </div>
+      <div class="level-row">
+        <span class="lv-icon">⚡</span>
+        <div class="lv-info"><div class="lv-title">第 2 关</div><div class="lv-desc">7 位随机数字</div></div>
+        <span class="lv-tag">⏱ 6s</span>
+      </div>
+      <div class="level-row">
+        <span class="lv-icon">🔥</span>
+        <div class="lv-info"><div class="lv-title">第 3 关</div><div class="lv-desc">10 位随机数字</div></div>
+        <span class="lv-tag">⏱ 9s</span>
+      </div>
+    </div>
+
+    <!-- leaderboard -->
+    <div class="lb-section" id="lb-section">
+      <div class="lb-header">
+        <span class="lb-title">🏅 社群排行榜</span>
+        <button class="lb-clear" id="lb-clear" onclick="clearLeaderboard()">清空</button>
+      </div>
+      <div class="lb-list" id="lb-list">
+        <div class="lb-empty">还没有人挑战，快来争第一 🚀</div>
+      </div>
+    </div>
+
+    <p class="home-footer">❤️ 共 3 颗心 · 答错重试本关</p>
   </div>
 
-  <!-- ================================================================
-       MEMORY PAGE
-       ================================================================ -->
-  <div v-if="currentPage==='memory'" class="page-enter-active w-full max-w-[430px] mx-auto min-h-dvh flex flex-col px-4 pt-6 pb-6 gap-4">
-    <div class="flex items-center justify-between">
-      <div class="text-sm font-extrabold text-white/50 px-4 py-1.5 rounded-full bg-white/5 border border-white/10">{{ stageConfig.icon }} 第 {{ stageIndex+1 }} 关 · {{ stageConfig.label }} · {{ stageConfig.pairs }} 组词对</div>
-      <div class="text-sm font-extrabold font-mono" :class="memoryRemaining<=3?'text-red-400':'text-purple-300'">⏱ {{ memoryRemaining.toFixed(1) }}s</div>
-    </div>
-    <div class="w-full h-3 bg-white/10 rounded-full overflow-hidden">
-      <div class="progress-bar h-full rounded-full" :style="{width:barPercent+'%'}" :class="memoryRemaining<=3?'bg-red-500 animate-bar-blink':'bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-400'"></div>
-    </div>
-    <div class="flex-1 flex flex-col gap-2.5 overflow-y-auto no-scrollbar">
-      <div v-for="(pair,idx) in stagePairs" :key="idx" class="flex items-center gap-3 p-4 rounded-xl border animate-fade-up" :class="['border-white/10 bg-white/5',idx===0?'border-l-4 border-l-yellow-400':idx===1?'border-l-4 border-l-purple-400':idx===2?'border-l-4 border-l-pink-400':idx===3?'border-l-4 border-l-blue-400':idx===4?'border-l-4 border-l-green-400':idx===5?'border-l-4 border-l-orange-400':idx===6?'border-l-4 border-l-cyan-400':'']" :style="{animationDelay:idx*0.08+'s'}">
-        <span class="text-lg font-extrabold text-white min-w-[48px] text-center">{{ pair.pair.left }}</span>
-        <div class="flex-1 flex items-center justify-center"><div class="h-px flex-1 bg-gradient-to-r from-transparent via-white/30 to-transparent"></div><span class="mx-2 text-white/30 text-sm">⟷</span><div class="h-px flex-1 bg-gradient-to-r from-transparent via-white/30 to-transparent"></div></div>
-        <span class="text-lg font-extrabold text-white min-w-[48px] text-center">{{ pair.pair.right }}</span>
+  <!-- =================== GAME =================== -->
+  <div class="page" id="pg-game">
+    <div class="game-topbar">
+      <div class="level-badge" id="badge-level">第 1/3 关</div>
+      <div class="hearts-row" id="hearts-row">
+        <span class="heart-icon">❤️</span>
+        <span class="heart-icon">❤️</span>
+        <span class="heart-icon">❤️</span>
       </div>
     </div>
-    <div class="text-center">
-      <p class="text-xs text-white/30 mb-2">记住每组词对的关联，倒计时结束后开始答题</p>
-      <button @click="skipMemory" class="btn-press w-full py-3.5 rounded-full text-base font-extrabold text-white bg-gradient-to-r from-purple-600/80 to-pink-500/80 border border-white/20 shadow-lg shadow-purple-500/15">🧠 我记好了！</button>
-    </div>
-  </div>
 
-  <!-- ================================================================
-       QUIZ PAGE
-       ================================================================ -->
-  <div v-if="currentPage==='quiz'" class="page-enter-active w-full max-w-[430px] mx-auto min-h-dvh flex flex-col px-4 pt-6 pb-6 gap-4">
-    <div class="flex items-center justify-between">
-      <div class="text-sm font-extrabold text-white/50 px-4 py-1.5 rounded-full bg-white/5 border border-white/10">{{ stageConfig.icon }} 第 {{ stageIndex+1 }} 关 · {{ quizIndex+1 }}/{{ stageConfig.pairs }} 题</div>
-      <div class="flex items-center gap-3">
-        <div class="flex gap-0.5"><span v-for="i in maxLives" :key="'h'+i" class="text-base transition-all duration-300" :class="i<=lives?'':'opacity-20 grayscale'">❤️</span></div>
-        <div class="text-sm font-bold text-purple-300">✓{{ totalCorrect }}</div>
+    <div class="game-main">
+      <div class="ring-wrap" id="ring-wrap">
+        <svg viewBox="0 0 112 112">
+          <circle class="ring-bg" cx="56" cy="56" r="50"/>
+          <circle class="ring-fg"  id="ring-fg" cx="56" cy="56" r="50"
+                  stroke-dasharray="314.159" stroke-dashoffset="0"/>
+        </svg>
+        <div class="ring-text" id="ring-txt">3</div>
       </div>
-    </div>
-    <div class="flex flex-col gap-2">
-      <div class="flex items-center gap-1.5"><span class="text-[10px] text-white/30 w-10 flex-shrink-0">本关</span><div class="flex gap-1.5 flex-1"><div v-for="i in stageConfig.pairs" :key="'s'+i" class="flex-1 h-1.5 rounded-full transition-all duration-300" :class="i<=quizIndex?(i<=stageCorrect?'bg-green-400':'bg-red-400'):'bg-white/15'"></div></div></div>
-      <div class="flex items-center gap-1.5"><span class="text-[10px] text-white/30 w-10 flex-shrink-0">全部</span><div class="flex gap-1 flex-1"><div v-for="i in 15" :key="'t'+i" class="flex-1 h-1 rounded-full transition-all duration-300" :class="i<=totalAnswered?(i<=totalCorrect?'bg-purple-400':'bg-red-400/60'):'bg-white/10'"></div></div></div>
-    </div>
-    <div class="flex-1 flex items-center gap-3">
-      <div class="w-[38%] flex flex-col items-center gap-2">
-        <div class="text-[11px] text-white/40 tracking-[2px]">🔍 提示词</div>
-        <div class="w-full text-center text-3xl font-extrabold text-white py-8 px-2 rounded-2xl bg-gradient-to-br from-purple-600/20 via-pink-500/20 to-yellow-500/20 border-2 border-yellow-400/30 shadow-lg shadow-yellow-400/10" :class="cueShake?'animate-shake':''">{{ currentCueWord }}</div>
-        <div class="text-[10px] text-white/30 text-center">选出配对的选项 →</div>
+
+      <div class="mem-num" id="mem-num"></div>
+      <p class="hint-line" id="hint-line">准备好了吗？</p>
+
+      <div class="input-block" id="input-block">
+        <div class="answer-box">
+          <span id="ans-text"></span><span class="caret" id="caret"></span>
+        </div>
+        <div class="pad" id="pad">
+          <button data-key="1">1</button>
+          <button data-key="2">2</button>
+          <button data-key="3">3</button>
+          <button data-key="4">4</button>
+          <button data-key="5">5</button>
+          <button data-key="6">6</button>
+          <button data-key="7">7</button>
+          <button data-key="8">8</button>
+          <button data-key="9">9</button>
+          <button class="btn-del" data-key="del">⌫</button>
+          <button data-key="0">0</button>
+          <button class="btn-go" data-key="go">确 定</button>
+        </div>
       </div>
-      <div class="w-[58%] grid grid-cols-2 gap-2">
-        <button v-for="(opt,idx) in quizOptions" :key="idx" @click="selectOption(opt)" :disabled="quizLocked"
-                class="option-card btn-press relative flex items-center justify-center py-4 px-1 rounded-2xl text-base font-extrabold text-white border-2 transition-all duration-200 min-h-[64px]"
-                :class="[quizLocked?(opt===correctAnswer?'border-green-400 bg-green-500/20 text-green-300':opt===selectedWrong?'border-red-400 bg-red-500/20 text-red-300 animate-shake':'border-white/10 bg-white/5 text-white/30'):optColors[idx]+' border-white/20 hover:border-white/40 shadow-lg']">
-          <span class="absolute -left-1.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full border-2" :class="quizLocked?(opt===correctAnswer?'bg-green-400 border-green-400':opt===selectedWrong?'bg-red-400 border-red-400':'bg-white/20 border-white/20'):'bg-yellow-400 border-yellow-400'"></span>
-          {{ opt }}
-          <span v-if="quizLocked&&opt===correctAnswer" class="absolute -top-2 -right-2 text-xl">✅</span>
-          <span v-if="quizLocked&&opt===selectedWrong" class="absolute -top-2 -right-2 text-xl">❌</span>
-        </button>
-      </div>
+
+      <div class="q-result" id="q-result"></div>
     </div>
   </div>
 
-  <!-- ================================================================
-       RESULT PAGE
-       ================================================================ -->
-  <div v-if="currentPage==='result'" class="page-enter-active w-full max-w-[430px] mx-auto min-h-dvh flex flex-col items-center px-4 pt-4 pb-6 gap-2.5">
+  <!-- =================== RESULT =================== -->
+  <div class="page result-page" id="pg-result">
+    <div class="big-emoji" id="res-icon"></div>
+    <div class="title-line" id="res-title"></div>
 
-    <!-- PK result -->
-    <div v-if="pkMode&&won" class="w-full text-center py-2 px-4 rounded-xl font-extrabold text-sm" :class="pkWin?'bg-green-500/20 border border-green-400/40 text-green-300':'bg-red-500/20 border border-red-400/40 text-red-300'">{{ pkWin?'🎉 PK 胜利！成功挑落对手 🎉':'😭 PK 失败！离超越TA就差一点点 😭' }}</div>
-
-    <!-- Stats card -->
-    <div class="w-full bg-gradient-to-br from-purple-900/30 via-pink-900/20 to-blue-900/30 border-2 border-purple-400/30 rounded-2xl p-4 flex flex-col gap-2.5 shadow-xl">
-      <div class="flex items-center justify-between">
-        <span class="text-xl font-extrabold text-white">🏆 战绩卡片</span>
-        <span class="text-sm font-bold" :class="won?(isFlashKing?'text-yellow-400':'text-purple-300'):'text-gray-400'">{{ won?(isFlashKing?'⚡闪电脑王':'👑联想脑王'):'😭记忆断片' }}</span>
+    <!-- share card -->
+    <div class="share-card" id="share-card">
+      <div class="card-header">🏆 战 绩 卡 片 🏆</div>
+      <div class="card-player" id="card-player"></div>
+      <div class="stats-row">
+        <div class="stat-cell"><div class="big" id="st-levels">--</div><div class="label">通关</div></div>
+        <div class="stat-cell"><div class="big" id="st-accuracy">--</div><div class="label">正确率</div></div>
+        <div class="stat-cell"><div class="big" id="st-time">--</div><div class="label">总耗时</div></div>
       </div>
-      <div class="text-center text-sm font-extrabold text-white">👤 {{ playerName }}</div>
-      <div class="grid grid-cols-3 gap-2">
-        <div class="text-center p-2 rounded-xl bg-white/5"><div class="text-xl font-extrabold text-white font-mono">{{ totalTime.toFixed(1) }}s</div><div class="text-[10px] text-white/40 mt-0.5">总耗时</div></div>
-        <div class="text-center p-2 rounded-xl bg-white/5"><div class="text-xl font-extrabold text-white">{{ totalCorrect }}/{{ totalAnswered }}</div><div class="text-[10px] text-white/40 mt-0.5">正确率</div></div>
-        <div class="text-center p-2 rounded-xl bg-white/5"><div class="text-xl font-extrabold" :class="lives>=2?'text-green-400':lives>=1?'text-yellow-400':'text-red-400'">{{ '❤️'.repeat(lives) }}</div><div class="text-[10px] text-white/40 mt-0.5">生命</div></div>
-      </div>
-      <div v-if="won" class="text-center py-2 rounded-xl bg-yellow-500/10 border border-yellow-400/20"><div class="text-xs font-extrabold text-yellow-300">📊 个人历史第 <span class="text-lg">{{ personalRank }}</span> 名（共 {{ history.length }} 条）</div></div>
+      <div class="rank-strip" id="rank-strip"></div>
+      <div class="watermark">社群最强大脑 · 瞬时记忆挑战</div>
     </div>
 
-        <!-- QR -->
-    <div class="w-full bg-gradient-to-br from-yellow-900/20 to-orange-900/20 border border-yellow-400/20 rounded-2xl p-3 flex flex-col items-center gap-2">
-      <div class="text-xs font-extrabold text-yellow-400">🎁 参与有礼 · 联系助理获取 5 元商城现金券</div>
-      <div class="w-[100px] h-[100px] rounded-xl overflow-hidden bg-white p-1 flex items-center justify-center"><img src="qrcode.jpg" alt="联系助理" class="w-full h-full object-contain" @error="qrError=true"></div>
-    </div>
-
-<!-- ================================================================
-         BRAIN MUSCLE PANEL (bottom, top-text + bottom-brain SVG)
-         ================================================================ -->
-    <div class="w-full bg-gradient-to-br from-cyan-900/20 via-blue-900/20 to-purple-900/20 border border-cyan-400/20 rounded-2xl overflow-hidden">
-      <div @click="brainExpanded=!brainExpanded" class="flex items-center justify-between p-4 cursor-pointer">
-        <span class="text-sm font-extrabold text-cyan-300 flex items-center gap-2">🧬 脑力肌肉与脑营养深度解析</span>
-        <span class="text-white/40 text-sm transition-transform duration-200" :class="brainExpanded?'rotate-180':''">▼</span>
-      </div>
-      <div v-if="brainExpanded" class="px-4 pb-5 flex flex-col gap-4">
-
-        <!-- Top: Text descriptions -->
-        <div class="flex flex-col gap-2">
-          <div class="flex items-center gap-2 text-xs leading-relaxed transition-all duration-300" :class="brainMuscleActive(0)?'text-white/70':'text-white/20'">
-            <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :class="brainMuscleActive(0)?'bg-yellow-400':'bg-white/10'"></span>
-            <span :class="brainMuscleActive(0)?'text-yellow-200 font-bold':''">前额叶</span><span class="text-white/40">· 工作记忆肌肉 — 在极限时间内维持数据流，大脑内存条疯狂刷新！</span><span :class="brainMuscleActive(0)?'text-yellow-300':'text-white/20'">💡 磷脂酰丝氨酸(PS)+DHA 双管齐下，快速提升大脑响应速度。</span>
-          </div>
-          <div class="flex items-center gap-2 text-xs leading-relaxed transition-all duration-300" :class="brainMuscleActive(1)?'text-white/70':'text-white/20'">
-            <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :class="brainMuscleActive(1)?'bg-cyan-400':'bg-white/10'"></span>
-            <span :class="brainMuscleActive(1)?'text-cyan-200 font-bold':''">颞叶</span><span class="text-white/40">· 视觉联想肌肉 — 将不相干事物图像化，深度激活右脑画面感！</span><span :class="brainMuscleActive(1)?'text-cyan-300':'text-white/20'">💡 叶黄素酯为视觉皮层建立抗蓝光滤镜，保护眼脑联动不卡顿。</span>
-          </div>
-          <div class="flex items-center gap-2 text-xs leading-relaxed transition-all duration-300" :class="brainMuscleActive(2)?'text-white/70':'text-white/20'">
-            <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :class="brainMuscleActive(2)?'bg-purple-400':'bg-white/10'"></span>
-            <span :class="brainMuscleActive(2)?'text-purple-200 font-bold':''">海马体</span><span class="text-white/40">· 神经突触连接 — 建立全新神经通路，检索速度超越95%凡人！</span><span :class="brainMuscleActive(2)?'text-purple-300':'text-white/20'">💡 神经酸修复加固神经纤维，告别瞬间断片，实现信息秒杀。</span>
-          </div>
-        </div>
-
-        <!-- Bottom: Anatomical brain SVG -->
-        <div class="relative w-full max-w-[260px] mx-auto">
-          <svg viewBox="0 0 280 200" class="w-full">
-            <path d="M130,175 Q130,190 125,198 L155,198 Q150,190 150,175" fill="none" stroke="white" stroke-width="1" opacity="0.15"/>
-            <ellipse cx="140" cy="170" rx="22" ry="14" fill="none" stroke="white" stroke-width="1" opacity="0.12"/>
-            <path d="M140,10 C100,8 55,30 30,65 C10,95 8,130 22,155 C30,170 45,178 60,175 C70,172 78,165 82,160 C75,150 72,142 75,135 C80,140 88,143 95,140 C100,148 108,150 115,145 C118,150 125,153 132,148 C135,152 138,155 140,153" fill="none" stroke="white" stroke-width="1.5" opacity="0.2"/>
-            <path d="M140,10 C180,8 225,30 250,65 C270,95 272,130 258,155 C250,170 235,178 220,175 C210,172 202,165 198,160 C205,150 208,142 205,135 C200,140 192,143 185,140 C180,148 172,150 165,145 C162,150 155,153 148,148 C145,152 142,155 140,153" fill="none" stroke="white" stroke-width="1.5" opacity="0.2"/>
-            <line x1="140" y1="12" x2="140" y2="152" stroke="white" stroke-width="0.8" opacity="0.12"/>
-            <path d="M50,55 Q65,50 75,60 Q70,70 55,72 M35,90 Q50,82 60,95 Q55,105 40,100 M230,55 Q215,50 205,60 Q210,70 225,72 M245,90 Q230,82 220,95 Q225,105 240,100" fill="none" stroke="white" stroke-width="0.6" opacity="0.1"/>
-            <!-- Frontal lobe -->
-            <g>
-              <path d="M140,12 C115,10 80,20 55,45 C38,65 42,85 50,95 C55,85 65,78 80,75 L95,70 C100,55 110,42 125,35 L140,30 Z" :fill="brainMuscleActive(0)?'rgba(234,179,8,0.22)':'rgba(255,255,255,0.02)'" :stroke="brainMuscleActive(0)?'rgba(234,179,8,0.5)':'rgba(255,255,255,0.08)'" stroke-width="1.5" class="transition-all duration-500"/>
-              <path d="M140,12 C165,10 200,20 225,45 C242,65 238,85 230,95 C225,85 215,78 200,75 L185,70 C180,55 170,42 155,35 L140,30 Z" :fill="brainMuscleActive(0)?'rgba(234,179,8,0.22)':'rgba(255,255,255,0.02)'" :stroke="brainMuscleActive(0)?'rgba(234,179,8,0.5)':'rgba(255,255,255,0.08)'" stroke-width="1.5" class="transition-all duration-500"/>
-              <text x="140" y="62" text-anchor="middle" :fill="brainMuscleActive(0)?'#fde047':'#ffffff20'" font-size="11" font-weight="800" class="transition-all duration-300">{{ brainMuscleActive(0)?'🧠 前额叶':'前额叶' }}</text>
-            </g>
-            <!-- Temporal lobes -->
-            <g>
-              <path d="M50,95 C55,85 65,78 80,75 L95,70 C100,80 95,105 85,125 C75,140 65,145 55,140 C42,132 40,110 50,95 Z" :fill="brainMuscleActive(1)?'rgba(6,182,212,0.2)':'rgba(255,255,255,0.02)'" :stroke="brainMuscleActive(1)?'rgba(6,182,212,0.45)':'rgba(255,255,255,0.08)'" stroke-width="1.5" class="transition-all duration-500"/>
-              <path d="M230,95 C225,85 215,78 200,75 L185,70 C180,80 185,105 195,125 C205,140 215,145 225,140 C238,132 240,110 230,95 Z" :fill="brainMuscleActive(1)?'rgba(6,182,212,0.2)':'rgba(255,255,255,0.02)'" :stroke="brainMuscleActive(1)?'rgba(6,182,212,0.45)':'rgba(255,255,255,0.08)'" stroke-width="1.5" class="transition-all duration-500"/>
-              <text x="75" y="115" text-anchor="middle" :fill="brainMuscleActive(1)?'#67e8f9':'#ffffff20'" font-size="9" font-weight="700" class="transition-all duration-300">{{ brainMuscleActive(1)?'👁 颞叶':'颞叶' }}</text>
-              <text x="205" y="115" text-anchor="middle" :fill="brainMuscleActive(1)?'#67e8f9':'#ffffff20'" font-size="9" font-weight="700" class="transition-all duration-300">{{ brainMuscleActive(1)?'👁 颞叶':'颞叶' }}</text>
-            </g>
-            <!-- Hippocampus -->
-            <g>
-              <path d="M105,105 C100,95 105,85 115,88 C125,91 128,100 125,110 C120,118 108,115 105,105 Z" :fill="brainMuscleActive(2)?'rgba(168,85,247,0.32)':'rgba(255,255,255,0.02)'" :stroke="brainMuscleActive(2)?'rgba(168,85,247,0.6)':'rgba(255,255,255,0.08)'" stroke-width="1.5" class="transition-all duration-500"/>
-              <path d="M175,105 C180,95 175,85 165,88 C155,91 152,100 155,110 C160,118 172,115 175,105 Z" :fill="brainMuscleActive(2)?'rgba(168,85,247,0.32)':'rgba(255,255,255,0.02)'" :stroke="brainMuscleActive(2)?'rgba(168,85,247,0.6)':'rgba(255,255,255,0.08)'" stroke-width="1.5" class="transition-all duration-500"/>
-              <text x="140" y="148" text-anchor="middle" :fill="brainMuscleActive(2)?'#c084fc':'#ffffff20'" font-size="10" font-weight="800" class="transition-all duration-300">{{ brainMuscleActive(2)?'⚡海马体':'海马体' }}</text>
-            </g>
-            <g v-if="brainMuscleActive(2)" class="brain-active">
-              <circle cx="115" cy="100" r="3" fill="rgba(168,85,247,0.4)"/><circle cx="165" cy="100" r="3" fill="rgba(168,85,247,0.4)"/>
-              <line x1="118" y1="98" x2="140" y2="92" stroke="rgba(168,85,247,0.3)" stroke-width="0.8"/><line x1="162" y1="98" x2="140" y2="92" stroke="rgba(168,85,247,0.3)" stroke-width="0.8"/>
-            </g>
-          </svg>
-          <div class="flex justify-center gap-4 text-[10px] mt-1">
-            <span class="flex items-center gap-1 transition-all" :class="brainMuscleActive(0)?'text-yellow-300':'text-white/15'"><span class="w-2 h-2 rounded-full flex-shrink-0" :class="brainMuscleActive(0)?'bg-yellow-400':'bg-white/10'"></span>工作记忆</span>
-            <span class="flex items-center gap-1 transition-all" :class="brainMuscleActive(1)?'text-cyan-300':'text-white/15'"><span class="w-2 h-2 rounded-full flex-shrink-0" :class="brainMuscleActive(1)?'bg-cyan-400':'bg-white/10'"></span>视觉联想</span>
-            <span class="flex items-center gap-1 transition-all" :class="brainMuscleActive(2)?'text-purple-300':'text-white/15'"><span class="w-2 h-2 rounded-full flex-shrink-0" :class="brainMuscleActive(2)?'bg-purple-400':'bg-white/10'"></span>神经连接</span>
-          </div>
+    <!-- QR code section -->
+    <div class="qr-section" id="qr-section">
+      <div class="qr-title">🎁 参与有礼</div>
+      <div class="qr-img-wrap" id="qr-img-wrap">
+        <img id="qr-img" src="qrcode.jpg" alt="扫码联系助理"
+             style="display:none;"
+             onerror="handleQrError()">
+        <canvas id="qr-canvas" width="154" height="154" style="display:none;"></canvas>
+        <div id="qr-placeholder" style="color:var(--text-muted);font-size:13px;text-align:center;line-height:1.5;">
+          📷<br>请将二维码图片<br>保存为 <b>qrcode.jpg</b><br>放入项目文件夹
         </div>
       </div>
-    </div>
-
-    <!-- Share -->
-    <div class="w-full flex flex-col gap-2.5">
-      <button v-if="won" @click="shareResult" class="btn-press w-full py-3.5 rounded-full text-base font-extrabold text-white bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 shadow-lg shadow-purple-500/25">📋 复制战报并生成PK链接</button>
-      <div class="flex gap-2.5">
-        <button @click="goHome" class="btn-press flex-1 py-3 rounded-full text-sm font-bold text-white/70 border border-white/20 bg-white/5">🏠 返回首页</button>
-        <button @click="retryGame" class="btn-press flex-1 py-3 rounded-full text-sm font-bold text-white bg-purple-600/60 border border-purple-400/30">🔄 再来一局</button>
+      <div class="qr-hint">
+        感谢参与脑力游戏<br>
+        <span class="qr-highlight">联系助理获取 5 元商城现金券</span>
       </div>
     </div>
 
-    <!-- Toast -->
-    <div v-if="toastVisible" class="fixed inset-0 z-50 flex items-center justify-center pointer-events-none"><div class="toast-enter bg-black/90 text-white text-sm font-bold px-6 py-3 rounded-2xl border border-white/20 shadow-2xl">{{ toastMsg }}</div></div>
+    <div class="result-rank-snippet" id="rank-snippet"></div>
+
+    <div class="act-row">
+      <button class="btn btn-ghost" onclick="goHome()">🏠 返回</button>
+      <button class="btn btn-solid" onclick="retryGame()">🔄 再来一局</button>
+    </div>
   </div>
 
-</div><!-- /#app -->
+</div>
 
-<script src="questions.js"></script>
-<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<!-- toast -->
+<div class="toast-overlay" id="toast-overlay">
+  <div class="toast-icon" id="toast-icon"></div>
+</div>
+
 <script>
-;(function(){
+;(function() {
+  /* ==========================================================
+     Constants
+     ========================================================== */
+  var LEVELS = [
+    { id: 1, name: '第 1 关', digits: 5,  time: 4000,  icon: '🌱' },
+    { id: 2, name: '第 2 关', digits: 7,  time: 6000,  icon: '⚡' },
+    { id: 3, name: '第 3 关', digits: 10, time: 9000,  icon: '🔥' },
+  ];
 
-var STAGES = [
-  { key:'easy',   label:'简单', pairs:3, time:8,  icon:'🌱', badgeBg:'bg-emerald-500/20 text-emerald-300', badge:'入门' },
-  { key:'medium', label:'进阶', pairs:5, time:17, icon:'⚡', badgeBg:'bg-amber-500/20 text-amber-300',     badge:'高手' },
-  { key:'hard',   label:'挑战', pairs:7, time:20, icon:'🔥', badgeBg:'bg-red-500/20 text-red-300',         badge:'王者' },
-];
+  var TOTAL_LEVELS = LEVELS.length;
+  var MAX_LIVES    = 3;
+  var READY_SEC    = 3;
+  var RING_CIRCUM  = 2 * Math.PI * 50;
+  var STORAGE_KEY  = 'memory_game_leaderboard_v2';
+  var NICK_KEY     = 'memory_game_nickname';
+  var COOKIE_KEY   = 'mg_nick';
 
-var BRAIN_MUSCLES = [
-  { activeClass:'bg-yellow-500/10 border-yellow-400/30', inactiveClass:'bg-white/[0.02] border-white/5' },
-  { activeClass:'bg-cyan-500/10 border-cyan-400/30',     inactiveClass:'bg-white/[0.02] border-white/5' },
-  { activeClass:'bg-purple-500/10 border-purple-400/30 brain-active', inactiveClass:'bg-white/[0.02] border-white/5' },
-];
+  /* ==========================================================
+     Cookie helpers (backup for localStorage)
+     ========================================================== */
+  function setCookie(name, value, days) {
+    var d = new Date();
+    d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+    document.cookie = name + '=' + encodeURIComponent(value) +
+      ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
+  }
 
-var HISTORY_KEY = 'word_memory_history_v2';
-var HIGHSCORE_KEY = 'word_memory_highscore_v2';
+  function getCookie(name) {
+    var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? decodeURIComponent(match[2]) : null;
+  }
 
-function loadHistory(){ try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');}catch(e){return[];} }
-function saveHistory(r){ try{localStorage.setItem(HISTORY_KEY,JSON.stringify(r));}catch(e){} }
-function loadHighScores(){ try{return JSON.parse(localStorage.getItem(HIGHSCORE_KEY)||'{}');}catch(e){return{};} }
-function saveHighScore(mode,time){ var s=loadHighScores(); if(!s[mode]||time<s[mode]){s[mode]=time;try{localStorage.setItem(HIGHSCORE_KEY,JSON.stringify(s));}catch(e){}} }
-function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
-function shuffle(a){ var b=a.slice(); for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;} return b; }
+  /* ==========================================================
+     WeChat detection
+     ========================================================== */
+  var ua = navigator.userAgent.toLowerCase();
+  var isWeChat = ua.indexOf('micromessenger') !== -1;
 
-var app = Vue.createApp({
-  data: function(){
-    var params = new URLSearchParams(window.location.search);
-    var urlMode = params.get('mode');
-    var validStages = ['easy','medium','hard'];
-    var rawTime = parseFloat(params.get('time'));
-    var pkTimeValid = isFinite(rawTime) && rawTime > 0;
-    var pkMode = params.has('mode') && params.has('time') && validStages.indexOf(urlMode)!==-1 && pkTimeValid;
-    var pkTime = pkMode ? rawTime : 0;
-    var pkTargetStage = pkMode ? urlMode : '';
-    var savedName = '';
-    try { savedName = localStorage.getItem('brain_king_nickname') || ''; } catch(e) {}
-    var nameHint = savedName ? '💡 已自动读取：' + savedName : '';
+  /* ==========================================================
+     State
+     ========================================================== */
+  var state = {
+    playerName: '',
+    currentLevelIdx: 0,
+    lives: MAX_LIVES,
+    cleared: 0,
+    currentNumber: '',
+    userInput: '',
+    isInputPhase: false,
+    gameStartTs: 0,
+    totalTimeMs: 0,
+    questionStartTs: 0,
+    levelAttempts: [],
+    questionsAnswered: 0,
+    questionsCorrect: 0,
+    animId: 0,
+    timerId: 0,
+  };
 
-    return {
-      currentPage: 'home',
-      isWeChat: /micromessenger/i.test(navigator.userAgent),
-      playerName: savedName,
-      nameHint: nameHint,
-      pkMode: pkMode, pkTime: pkTime, pkTargetStage: pkTargetStage, pkWin: false,
+  /* ==========================================================
+     DOM cache
+     ========================================================== */
+  var $ = function(s) { return document.querySelector(s); };
 
-      stageIndex: 0, retryStageIndex: 0, stagePairs: [], quizIndex: 0, quizOptions: [], correctAnswer: '',
-      stageCorrect: 0, totalCorrect: 0, totalAnswered: 0,
-      lives: 3, maxLives: 3, wrongPair: null, selectedWrong: '', quizLocked: false, cueShake: false,
+  var pgHome   = $('#pg-home');
+  var pgGame   = $('#pg-game');
+  var pgResult = $('#pg-result');
 
-      quizStartTime: 0, totalTime: 0, memoryRemaining: 0, memoryTotal: 0, memoryPhase: false,
+  var nicknameInput  = $('#nickname-input');
+  var wxDetectBadge  = $('#wx-detect-badge');
 
-      won: false, reachedStage: 'easy', reachedStageIcon: '🌱',
-      resultEmoji: '🏆', resultTitle: '', currentGameId: '', isFlashKing: false,
+  var badgeLevel  = $('#badge-level');
+  var heartsRow   = $('#hearts-row');
+  var ringWrap    = $('#ring-wrap');
+  var ringFg      = $('#ring-fg');
+  var ringTxt     = $('#ring-txt');
+  var memNum      = $('#mem-num');
+  var hintLine    = $('#hint-line');
+  var inputBlock  = $('#input-block');
+  var ansText     = $('#ans-text');
+  var caretEl     = $('#caret');
+  var padEl       = $('#pad');
+  var qResult     = $('#q-result');
 
-      history: loadHistory(), highScores: loadHighScores(), showHistory: false, personalRank: 1,
+  var resIcon      = $('#res-icon');
+  var resTitle     = $('#res-title');
+  var cardPlayer   = $('#card-player');
+  var stLevels     = $('#st-levels');
+  var stAccuracy   = $('#st-accuracy');
+  var stTime       = $('#st-time');
+  var rankStrip    = $('#rank-strip');
+  var rankSnippet  = $('#rank-snippet');
 
-      brainExpanded: false,
+  // QR
+  var qrImg        = $('#qr-img');
+  var qrCanvas     = $('#qr-canvas');
+  var qrPlaceholder = $('#qr-placeholder');
 
-      toastVisible: false, toastMsg: '', animFrameId: 0, qrError: false,
+  var toastOverlay = $('#toast-overlay');
+  var toastIcon    = $('#toast-icon');
+  var lbList       = $('#lb-list');
 
-      optColors: [
-        'bg-gradient-to-br from-purple-500/30 to-pink-500/30',
-        'bg-gradient-to-br from-blue-500/30 to-cyan-500/30',
-        'bg-gradient-to-br from-orange-500/30 to-yellow-500/30',
-        'bg-gradient-to-br from-green-500/30 to-emerald-500/30',
-      ],
-    };
-  },
+  /* ==========================================================
+     Leaderboard (localStorage)
+     ========================================================== */
+  function loadLeaderboard() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) { return []; }
+  }
 
-  computed: {
-    stageConfig: function(){ return STAGES[this.stageIndex]||STAGES[0]; },
-    barPercent: function(){ if(this.memoryTotal<=0)return 0; return Math.max(0,(this.memoryRemaining/this.memoryTotal)*100); },
-    currentCueWord: function(){ if(this.quizIndex<this.stagePairs.length)return this.stagePairs[this.quizIndex].pair.left; return''; },
-    rankedHistory: function(){
-      var tier={hard:3,medium:2,easy:1}; var s=this.history.slice();
-      s.sort(function(a,b){var da=tier[a.reachedStage]||0,db=tier[b.reachedStage]||0;if(db!==da)return db-da;return a.time-b.time;});
-      return s.slice(0,5);
-    },
-  },
+  function saveLeaderboard(records) {
+    records.sort(function(a, b) {
+      if (a.cleared !== b.cleared) return b.cleared - a.cleared;
+      if (a.accuracy !== b.accuracy) return b.accuracy - a.accuracy;
+      return a.timeMs - b.timeMs;
+    });
+    var top = records.slice(0, 50);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(top));
+    } catch (e) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(top.slice(0, 20)));
+    }
+    return top;
+  }
 
-  methods: {
-    stageLabel: function(k){ var m={easy:'简单',medium:'进阶',hard:'挑战'}; return m[k]||'简单'; },
+  function addRecord(rec) {
+    var records = loadLeaderboard();
+    records.push(rec);
+    saveLeaderboard(records);
+    renderLeaderboard();
+  }
 
-    brainMuscleActive: function(idx){ return idx <= this.stageIndex; },
-    brainMuscleClass: function(idx){ return this.brainMuscleActive(idx)?BRAIN_MUSCLES[idx].activeClass:BRAIN_MUSCLES[idx].inactiveClass; },
+  window.clearLeaderboard = function() {
+    if (confirm('确定要清空排行榜吗？此操作不可撤销。')) {
+      localStorage.removeItem(STORAGE_KEY);
+      renderLeaderboard();
+    }
+  };
 
-    dismissPk: function(){ this.pkMode=false;this.pkTime=0;this.pkTargetStage='';window.history.replaceState({},'',window.location.origin+window.location.pathname); },
+  function renderLeaderboard() {
+    var records = loadLeaderboard();
+    if (!records.length) {
+      lbList.innerHTML = '<div class="lb-empty">还没有人挑战，快来争第一 🚀</div>';
+      return;
+    }
+    var html = '';
+    for (var i = 0; i < records.length; i++) {
+      var r = records[i];
+      var rankClass = i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : 'rn';
+      var rankIcon = i === 0 ? '👑' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+      html += '<div class="lb-item">' +
+        '<div class="lb-rank ' + rankClass + '">' + rankIcon + '</div>' +
+        '<div class="lb-name">' + escHtml(r.name) + '</div>' +
+        '<div class="lb-info">' +
+          '<div class="lb-time">' + formatMs(r.timeMs) + '</div>' +
+          '<div class="lb-meta">' + r.cleared + '关 · ' + r.accuracy + '% · ' + r.date + '</div>' +
+        '</div>' +
+      '</div>';
+    }
+    lbList.innerHTML = html;
+  }
 
-    startGame: function(){
-      var name = this.playerName.trim();
-      if(!name){ this.showToast('⚠️ 请先填写你的微信名称'); return; }
-      // Persist nickname
-      try { localStorage.setItem('brain_king_nickname', name); } catch(e) {}
-      this.nameHint = '';
+  function escHtml(s) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(s));
+    return div.innerHTML;
+  }
 
-      var bank=window.WORD_BANK;
-      if(!bank||!bank.easy||bank.easy.length<3){ bank={easy:[{id:1,pair:{left:'太阳',right:'冰淇淋'}},{id:2,pair:{left:'猫咪',right:'雨伞'}},{id:3,pair:{left:'自行车',right:'背包'}},{id:4,pair:{left:'海滩',right:'排球'}},{id:5,pair:{left:'图书馆',right:'咖啡杯'}}],medium:[{id:1,pair:{left:'恐龙',right:'奶茶'}},{id:2,pair:{left:'袜子',right:'汉堡'}},{id:3,pair:{left:'钢琴',right:'仙人掌'}},{id:4,pair:{left:'手机',right:'皮划艇'}},{id:5,pair:{left:'月亮',right:'拖鞋'}},{id:6,pair:{left:'冰箱',right:'风筝'}},{id:7,pair:{left:'微波炉',right:'雨伞'}}],hard:[{id:1,pair:{left:'潜水艇',right:'长颈鹿'}},{id:2,pair:{left:'灭火器',right:'棒棒糖'}},{id:3,pair:{left:'螺丝刀',right:'棉花糖'}},{id:4,pair:{left:'埃菲尔铁塔',right:'水蜜桃'}},{id:5,pair:{left:'垃圾桶',right:'红领巾'}},{id:6,pair:{left:'坦克',right:'口红'}},{id:7,pair:{left:'手术刀',right:'气球'}},{id:8,pair:{left:'火箭',right:'蒲公英'}},{id:9,pair:{left:'棺材',right:'彩虹'}}]}; }
-      this.wordBank=bank;
-      this.stageIndex=this.retryStageIndex; this.retryStageIndex=0; this.totalCorrect=0; this.totalAnswered=0; this.lives=this.maxLives;
-      this.wrongPair=null; this.selectedWrong=''; this.quizLocked=false; this.cueShake=false;
-      this.won=false; this.quizStartTime=0; this.totalTime=0; this.currentGameId=uid();
-      this.loadStage();
-    },
+  /* ==========================================================
+     Page helpers
+     ========================================================== */
+  function switchPage(page) {
+    pgHome.classList.remove('active');
+    pgGame.classList.remove('active');
+    pgResult.classList.remove('active');
+    page.classList.add('active');
+  }
 
-    loadStage: function(){
-      var cfg=this.stageConfig; var pool=this.wordBank[cfg.key]; var shuffled=shuffle(pool);
-      this.stagePairs=shuffled.slice(0,cfg.pairs);
-      this.quizIndex=0; this.stageCorrect=0; this.quizLocked=false; this.selectedWrong='';
-      this.startMemoryPhase();
-    },
+  /* ==========================================================
+     Toast
+     ========================================================== */
+  function flashToast(emoji) {
+    toastIcon.textContent = emoji;
+    toastOverlay.classList.add('show');
+    clearTimeout(state._toastTid);
+    state._toastTid = setTimeout(function() {
+      toastOverlay.classList.remove('show');
+    }, 620);
+  }
 
-    startMemoryPhase: function(){
-      var self=this; this.currentPage='memory'; this.memoryPhase=true; this.memoryTotal=this.stageConfig.time; this.memoryRemaining=this.memoryTotal;
-      var startTs=Date.now();
-      function tick(){ if(!self.memoryPhase)return; var elapsed=(Date.now()-startTs)/1000; var remaining=Math.max(0,self.memoryTotal-elapsed); self.memoryRemaining=remaining; if(remaining<=0){self.memoryPhase=false;self.startQuiz();return;} self.animFrameId=requestAnimationFrame(tick); }
-      this.animFrameId=requestAnimationFrame(tick);
-    },
+  /* ==========================================================
+     Hearts
+     ========================================================== */
+  function renderHearts() {
+    var h = '';
+    for (var i = 0; i < MAX_LIVES; i++) {
+      h += '<span class="heart-icon' + (i >= state.lives ? ' broken' : '') + '">❤️</span>';
+    }
+    heartsRow.innerHTML = h;
+  }
 
-    skipMemory: function(){ this.memoryPhase=false; cancelAnimationFrame(this.animFrameId); this.startQuiz(); },
+  /* ==========================================================
+     Random digit string
+     ========================================================== */
+  function randNum(len) {
+    var s = '';
+    for (var i = 0; i < len; i++) s += Math.floor(Math.random() * 10);
+    return s;
+  }
 
-    startQuiz: function(){
-      cancelAnimationFrame(this.animFrameId); this.currentPage='quiz'; this.quizIndex=0; this.stageCorrect=0;
-      this.quizLocked=false; this.selectedWrong='';
-      if(!this.quizStartTime) this.quizStartTime=Date.now();
-      this.generateOptions();
-    },
+  /* ==========================================================
+     QR code - try local image, fallback to canvas generation
+     ========================================================== */
+  var qrImageOk = false;
 
-    generateOptions: function(){
-      var pool=this.wordBank[this.stageConfig.key]; var cp=this.stagePairs[this.quizIndex];
-      this.correctAnswer=cp.pair.right;
-      var others=pool.filter(function(p){return p.pair.right!==cp.pair.right&&p.pair.left!==cp.pair.left;}).map(function(p){return p.pair.right;});
-      var uniq=[]; for(var i=0;i<others.length&&uniq.length<3;i++){if(uniq.indexOf(others[i])===-1)uniq.push(others[i]);}
-      this.quizOptions=shuffle([cp.pair.right].concat(shuffle(uniq).slice(0,3)));
-    },
+  function initQrCode() {
+    // Reset
+    qrImg.style.display = 'none';
+    qrCanvas.style.display = 'none';
+    qrPlaceholder.style.display = 'none';
 
-    selectOption: function(opt){
-      if(this.quizLocked)return;
-      var self=this; this.quizLocked=true;
+    if (qrImageOk) {
+      // Image loaded successfully earlier
+      qrImg.style.display = 'block';
+      return;
+    }
 
-      if(opt===this.correctAnswer){
-        this.stageCorrect++; this.totalCorrect++; this.totalAnswered++;
-        setTimeout(function(){
-          self.quizIndex++;
-          if(self.quizIndex>=self.stageConfig.pairs){
-            if(self.stageIndex>=2){ self.reachedStage='hard'; self.reachedStageIcon='🔥'; self.endGame(true); }
-            else { self.stageIndex++; self.quizLocked=false; self.loadStage(); }
-          } else { self.quizLocked=false; self.selectedWrong=''; self.generateOptions(); }
-        },350);
-      } else {
-        this.totalAnswered++; this.lives--; this.selectedWrong=opt;
-        this.wrongPair=this.stagePairs[this.quizIndex]; this.cueShake=true;
-        this.reachedStage=STAGES[this.stageIndex].key; this.reachedStageIcon=STAGES[this.stageIndex].icon;
+    // Try local image
+    qrImg.style.display = 'block';
+    qrPlaceholder.style.display = 'none';
+  }
 
-        if(this.lives<=0){
-          setTimeout(function(){ self.cueShake=false; self.endGame(false); },800);
+  window.handleQrError = function() {
+    // Local qrcode.png failed to load → generate via canvas
+    qrImg.style.display = 'none';
+    qrPlaceholder.style.display = 'none';
+    generateQrCanvas();
+  };
+
+  function generateQrCanvas() {
+    // Generate fallback — try qrcode.jpg then qrcode.png
+    var formats = ['qrcode.jpg', 'qrcode.png'];
+    tryFormat(0);
+
+    function tryFormat(idx) {
+      if (idx >= formats.length) {
+        // All failed
+        qrCanvas.style.display = 'none';
+        qrPlaceholder.style.display = 'block';
+        qrPlaceholder.innerHTML = '📷<br>请将二维码图片<br>保存为 <b>qrcode.jpg</b><br>放入项目文件夹';
+        return;
+      }
+      var img = new Image();
+      img.onload = function() {
+        var ctx = qrCanvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, 154, 154);
+        ctx.drawImage(img, 0, 0, 154, 154);
+        qrCanvas.style.display = 'block';
+      };
+      img.onerror = function() { tryFormat(idx + 1); };
+      img.src = formats[idx];
+    }
+  }
+
+  function preCheckQrImage() {
+    var formats = ['qrcode.jpg', 'qrcode.png'];
+    tryCheck(0);
+
+    function tryCheck(idx) {
+      if (idx >= formats.length) {
+        qrImageOk = false;
+        return;
+      }
+      var img = new Image();
+      img.onload = function() {
+        qrImageOk = true;
+        // Update the visible img element src to the working format
+        qrImg.src = formats[idx];
+      };
+      img.onerror = function() { tryCheck(idx + 1); };
+      img.src = formats[idx];
+    }
+  }
+
+  /* ==========================================================
+     Launch / Retry
+     ========================================================== */
+  window.launchGame = function() {
+    var name = nicknameInput.value.trim();
+    if (!name) {
+      nicknameInput.focus();
+      nicknameInput.style.borderColor = 'var(--accent)';
+      nicknameInput.style.boxShadow = '0 0 0 3px rgba(244,63,94,0.2)';
+      setTimeout(function() {
+        nicknameInput.style.borderColor = '';
+        nicknameInput.style.boxShadow = '';
+      }, 1500);
+      return;
+    }
+
+    // persist nickname to both localStorage + cookie
+    try { localStorage.setItem(NICK_KEY, name); } catch (e) {}
+    setCookie(COOKIE_KEY, name, 365);
+
+    state.playerName        = name;
+    state.currentLevelIdx   = 0;
+    state.lives             = MAX_LIVES;
+    state.cleared           = 0;
+    state.totalTimeMs       = 0;
+    state.levelAttempts     = [];
+    state.questionsAnswered = 0;
+    state.questionsCorrect  = 0;
+    state.gameStartTs       = Date.now();
+
+    renderHearts();
+    switchPage(pgGame);
+    loadLevel();
+  };
+
+  window.retryGame = function() {
+    window.launchGame();
+  };
+
+  window.goHome = function() {
+    cancelAnimationFrame(state.animId);
+    clearTimeout(state.timerId);
+    renderLeaderboard();
+    switchPage(pgHome);
+  };
+
+  /* ==========================================================
+     Level loading
+     ========================================================== */
+  function loadLevel() {
+    var lv = LEVELS[state.currentLevelIdx];
+    state.isInputPhase   = false;
+    state.userInput      = '';
+    state.currentNumber  = randNum(lv.digits);
+
+    badgeLevel.textContent = '第 ' + lv.id + '/3 关';
+
+    memNum.classList.remove('hidden');
+    memNum.style.animation = 'none';
+    void memNum.offsetWidth;
+    memNum.style.animation = 'numPop 0.32s ease';
+    memNum.textContent = '';
+
+    ringWrap.style.display = '';
+    ringFg.style.strokeDashoffset = '0';
+    ringFg.style.stroke = 'var(--primary-lt)';
+
+    inputBlock.classList.remove('on');
+    qResult.classList.remove('on');
+    hintLine.textContent = '准备好了吗？';
+
+    ansText.textContent = '';
+    caretEl.style.display = 'none';
+
+    runCountdown(lv.time, lv.digits);
+  }
+
+  /* ==========================================================
+     Countdown + memorise
+     ========================================================== */
+  function runCountdown(memoriseMs, digitCount) {
+    var totalMs  = READY_SEC * 1000 + memoriseMs;
+    var startTs  = Date.now();
+    var phase    = 'ready';
+
+    cancelAnimationFrame(state.animId);
+
+    function frame() {
+      var elapsed   = Date.now() - startTs;
+      var remaining = Math.max(0, totalMs - elapsed);
+      var progress  = 1 - (remaining / totalMs);
+
+      ringFg.style.strokeDashoffset = (RING_CIRCUM * (1 - progress)).toFixed(2);
+
+      if (phase === 'ready' && elapsed >= READY_SEC * 1000) {
+        phase = 'show';
+        memNum.textContent = state.currentNumber;
+        hintLine.textContent = '记住这 ' + digitCount + ' 位数字！';
+        ringFg.style.stroke = '#f59e0b';
+      }
+
+      if (phase === 'show' && elapsed >= totalMs) {
+        phase = 'input';
+        memNum.classList.add('hidden');
+        ringWrap.style.display = 'none';
+        hintLine.textContent = '请输入你记住的数字';
+        inputBlock.classList.add('on');
+        state.isInputPhase = true;
+        state.questionStartTs = Date.now();
+        caretEl.style.display = 'inline-block';
+        return;
+      }
+
+      if (phase === 'ready') {
+        ringTxt.textContent = Math.ceil((READY_SEC * 1000 - elapsed) / 1000);
+      } else if (phase === 'show') {
+        ringTxt.textContent = Math.max(0, (totalMs - elapsed) / 1000).toFixed(1);
+      }
+
+      state.animId = requestAnimationFrame(frame);
+    }
+
+    ringTxt.textContent = READY_SEC;
+    state.animId = requestAnimationFrame(frame);
+  }
+
+  /* ==========================================================
+     Input handling
+     ========================================================== */
+  function pushDigit(d) {
+    if (!state.isInputPhase) return;
+    var max = LEVELS[state.currentLevelIdx].digits;
+    if (state.userInput.length >= max) return;
+    state.userInput += d;
+    ansText.textContent = state.userInput;
+  }
+
+  function popDigit() {
+    if (!state.isInputPhase) return;
+    state.userInput = state.userInput.slice(0, -1);
+    ansText.textContent = state.userInput;
+  }
+
+  padEl.addEventListener('click', function(e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    var key = btn.getAttribute('data-key');
+    if (!key) return;
+    if (key === 'del') { popDigit(); }
+    else if (key === 'go') { handleSubmit(); }
+    else { pushDigit(key); }
+  });
+
+  padEl.addEventListener('touchstart', function(e) {
+    if (e.target.closest('button')) { e.preventDefault(); e.target.closest('button').click(); }
+  }, { passive: false });
+
+  document.addEventListener('keydown', function(e) {
+    if (!state.isInputPhase) return;
+    if (e.key >= '0' && e.key <= '9') pushDigit(e.key);
+    else if (e.key === 'Backspace' || e.key === 'Delete') popDigit();
+    else if (e.key === 'Enter') handleSubmit();
+  });
+
+  /* ==========================================================
+     Submit
+     ========================================================== */
+  window.handleSubmit = function() {
+    if (!state.isInputPhase) return;
+    if (state.userInput.length === 0) {
+      inputBlock.classList.add('shake');
+      setTimeout(function() { inputBlock.classList.remove('shake'); }, 500);
+      return;
+    }
+
+    state.isInputPhase = false;
+    caretEl.style.display = 'none';
+
+    var timeTaken  = Date.now() - state.questionStartTs;
+    var isCorrect  = state.userInput === state.currentNumber;
+    state.questionsAnswered++;
+
+    qResult.classList.add('on');
+    if (isCorrect) {
+      state.questionsCorrect++;
+      state.levelAttempts.push(timeTaken);
+      qResult.className = 'q-result on correct';
+      qResult.innerHTML = '✅ 回答正确！ 用时 <b>' + formatMs(timeTaken) + '</b>';
+      flashToast('✅');
+    } else {
+      qResult.className = 'q-result on wrong';
+      qResult.innerHTML = '❌ 回答错误！ 用时 <b>' + formatMs(timeTaken) + '</b>';
+      flashToast('💔');
+      inputBlock.classList.add('shake');
+      setTimeout(function() { inputBlock.classList.remove('shake'); }, 500);
+    }
+
+    clearTimeout(state.timerId);
+    state.timerId = setTimeout(function() {
+      qResult.classList.remove('on');
+      inputBlock.classList.remove('on');
+
+      if (isCorrect) {
+        state.cleared++;
+        state.currentLevelIdx++;
+        if (state.currentLevelIdx >= TOTAL_LEVELS) {
+          endGame();
         } else {
-          var curStageIdx=this.stageIndex;
-          setTimeout(function(){
-            self.cueShake=false; self.quizIndex++;
-            if(self.quizIndex>=self.stageConfig.pairs){
-              if(curStageIdx>=2){ self.reachedStage='hard'; self.reachedStageIcon='🔥'; self.endGame(true); }
-              else { self.stageIndex++; self.quizLocked=false; self.loadStage(); }
-            } else { self.quizLocked=false; self.selectedWrong=''; self.generateOptions(); }
-          },800);
+          loadLevel();
+        }
+      } else {
+        state.lives--;
+        renderHearts();
+        if (state.lives <= 0) {
+          endGame();
+        } else {
+          loadLevel();
         }
       }
-    },
+    }, 1000);
+  };
 
-    endGame: function(won){
-      var self=this; this.won=won;
-      this.totalTime=this.quizStartTime?(Date.now()-this.quizStartTime)/1000:0;
+  /* ==========================================================
+     End game
+     ========================================================== */
+  function endGame() {
+    cancelAnimationFrame(state.animId);
+    clearTimeout(state.timerId);
 
-      if(won){
-        var avgTime=this.totalTime/Math.max(1,this.totalAnswered);
-        this.isFlashKing=avgTime<1.0&&this.lives===this.maxLives;
-        this.resultEmoji=this.lives===this.maxLives?(this.isFlashKing?'⚡':'👑'):'🏆';
-        this.resultTitle=this.lives===this.maxLives?(this.isFlashKing?'闪电脑王':'联想脑王'):'联想脑王（受伤通关）';
-        this.reachedStage='hard'; this.reachedStageIcon='🔥';
-      } else {
-        this.isFlashKing=false; this.resultEmoji='😭';
-        if(this.stageIndex>=2)this.resultTitle='记忆断片 · 倒在最后一关';
-        else if(this.stageIndex>=1)this.resultTitle='记忆断片 · 第二关翻车';
-        else this.resultTitle='记忆断片';
+    state.totalTimeMs = Date.now() - state.gameStartTs;
+
+    var clearedOutOf = state.cleared + '/' + TOTAL_LEVELS;
+    var accuracy     = state.questionsAnswered === 0 ? 0
+                     : Math.round((state.questionsCorrect / state.questionsAnswered) * 100);
+
+    // ── rank ──
+    var icon, title, rankClass, rankLabel;
+    if (state.cleared === TOTAL_LEVELS) {
+      icon = '🏆'; title = '闪电大脑 · 至尊段位'; rankClass = 'sss'; rankLabel = '🏆 闪电大脑';
+    } else if (state.cleared === 2) {
+      icon = '🥇'; title = '记忆达人 · 钻石段位'; rankClass = 'ss';  rankLabel = '🥇 记忆达人';
+    } else if (state.cleared === 1) {
+      icon = '🥈'; title = '记忆新星 · 黄金段位'; rankClass = 's';   rankLabel = '🥈 记忆新星';
+    } else {
+      icon = '💪'; title = '继续努力 · 再接再厉'; rankClass = 'a';   rankLabel = '💪 继续努力';
+    }
+
+    // ── populate ──
+    resIcon.textContent    = icon;
+    resTitle.textContent   = title;
+    cardPlayer.innerHTML   = '👤 ' + escHtml(state.playerName) + '<span class="wx-tag">微信</span>';
+    stLevels.textContent   = clearedOutOf;
+    stAccuracy.textContent = accuracy + '%';
+    stTime.textContent     = formatMs(state.totalTimeMs);
+    rankStrip.textContent  = rankLabel;
+    rankStrip.className    = 'rank-strip ' + rankClass;
+
+    // ── init QR code ──
+    initQrCode();
+
+    // ── save record ──
+    var now = new Date();
+    var dateStr = (now.getMonth() + 1) + '/' + now.getDate() + ' ' +
+                  pad2(now.getHours()) + ':' + pad2(now.getMinutes());
+    addRecord({
+      name: state.playerName,
+      cleared: state.cleared,
+      accuracy: accuracy,
+      timeMs: state.totalTimeMs,
+      date: dateStr,
+      ts: now.getTime(),
+    });
+
+    // ── rank snippet ──
+    var all = loadLeaderboard();
+    var myIdx = -1;
+    for (var i = 0; i < all.length; i++) {
+      if (all[i].ts === now.getTime() && all[i].name === state.playerName &&
+          all[i].cleared === state.cleared && all[i].timeMs === state.totalTimeMs) {
+        myIdx = i;
+        break;
       }
+    }
+    if (myIdx >= 0) {
+      rankSnippet.textContent = '📊 当前排名：第 ' + (myIdx + 1) + ' 名（共 ' + all.length + ' 人参与）';
+    } else {
+      rankSnippet.textContent = '📊 战绩已记录！';
+    }
 
-      if(won){
-        var now=new Date();
-        var dateStr=(now.getMonth()+1)+'/'+now.getDate()+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-        var record={ id:this.currentGameId, name:this.playerName, reachedStage:'hard', time:parseFloat(this.totalTime.toFixed(1)), correct:this.totalCorrect, total:this.totalAnswered, livesLeft:this.lives, date:dateStr, title:this.isFlashKing?'闪电脑王 ⚡':(this.lives<this.maxLives?'联想脑王 👑（受伤）':'联想脑王 👑'), ts:now.getTime() };
-        saveHighScore('hard',record.time);
-        var hist=loadHistory(); hist.push(record);
-        var tier={hard:3,medium:2,easy:1};
-        hist.sort(function(a,b){var da=tier[a.reachedStage]||0,db=tier[b.reachedStage]||0;if(db!==da)return db-da;return a.time-b.time;});
-        saveHistory(hist); this.history=hist; this.highScores=loadHighScores();
-        var rank=1; for(var i=0;i<hist.length;i++){if(hist[i].id===record.id){rank=i+1;break;}}
-        this.personalRank=rank;
-        if(this.pkMode){this.pkWin=record.time<this.pkTime;}
+    switchPage(pgResult);
+  }
+
+  /* ==========================================================
+     Helpers
+     ========================================================== */
+  function formatMs(ms) {
+    var sec = (ms / 1000).toFixed(1);
+    if (+sec < 60) return sec + 's';
+    var m = Math.floor(+sec / 60);
+    var s = Math.round(+sec % 60);
+    return m + 'm' + s + 's';
+  }
+
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+
+  /* ==========================================================
+     Init
+     ========================================================== */
+  function init() {
+    // ── WeChat detection ──
+    if (isWeChat) {
+      wxDetectBadge.style.display = 'inline-flex';
+      wxDetectBadge.className = 'wechat-badge-inline';
+      wxDetectBadge.textContent = '✅ 已在微信中';
+      nicknameInput.placeholder = '点击输入你的微信昵称';
+    }
+
+    // ── Restore nickname (localStorage first, then cookie) ──
+    var savedNick = '';
+    try { savedNick = localStorage.getItem(NICK_KEY) || ''; } catch (e) {}
+    if (!savedNick) { savedNick = getCookie(COOKIE_KEY) || ''; }
+    if (savedNick) {
+      nicknameInput.value = savedNick;
+      // sync between storage
+      try { localStorage.setItem(NICK_KEY, savedNick); } catch (e) {}
+      setCookie(COOKIE_KEY, savedNick, 365);
+      // show auto-fill hint
+      var nickHint = document.getElementById('nick-hint');
+      if (nickHint) {
+        nickHint.style.display = 'block';
+        nickHint.textContent = '💡 已自动读取：' + savedNick;
       }
+    }
 
-      this.retryStageIndex=this.stageIndex; this.brainExpanded=true; this.currentPage='result';
-    },
+    // ── Pre-check QR image ──
+    preCheckQrImage();
 
-    shareResult: function(){
-      var baseUrl=window.location.origin+window.location.pathname;
-      var pkLink=baseUrl+'?mode=hard&time='+this.totalTime.toFixed(1);
-      var shareText='🔥 联想脑王PK！我刚刚用 '+this.totalTime.toFixed(1)+' 秒连闯三关，斩获【'+(this.isFlashKing?'闪电脑王 ⚡':'联想脑王 👑')+'】！目前位列我个人历史第 '+this.personalRank+' 名！这是我的挑战书，不服来战：'+pkLink;
-      if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(shareText).then(function(){this.showToast('✅ 战报已复制！快去分享给好友吧');}.bind(this)).catch(function(){this.fallbackCopy(shareText);}.bind(this)); }
-      else { this.fallbackCopy(shareText); }
-    },
+    renderLeaderboard();
 
-    fallbackCopy: function(text){ var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');this.showToast('✅ 战报已复制！');}catch(e){this.showToast('⚠️ 复制失败');}document.body.removeChild(ta); },
+    document.getElementById('btn-start').addEventListener('touchstart', function(e) {
+      e.preventDefault(); this.click();
+    }, { passive: false });
+  }
 
-    goHome: function(){ cancelAnimationFrame(this.animFrameId);this.memoryPhase=false;this.currentPage='home';this.showHistory=false;this.brainExpanded=false;this.won=false;this.stageIndex=0;this.history=loadHistory();this.highScores=loadHighScores(); },
-    retryGame: function(){ cancelAnimationFrame(this.animFrameId);this.memoryPhase=false;this.brainExpanded=false;this.startGame(); },
-    clearHistory: function(){ if(confirm('确定要清空所有历史战绩吗？')){localStorage.removeItem(HISTORY_KEY);localStorage.removeItem(HIGHSCORE_KEY);this.history=[];this.highScores={};} },
-    showToast: function(msg){ var self=this;this.toastMsg=msg;this.toastVisible=true;clearTimeout(this._toastTid);this._toastTid=setTimeout(function(){self.toastVisible=false;},2000); },
-  },
+  init();
 
-  mounted: function(){ if(typeof WORD_BANK==='undefined')console.warn('questions.js not loaded!'); },
-  beforeUnmount: function(){ cancelAnimationFrame(this.animFrameId); },
-});
-
-app.mount('#app');
 })();
 </script>
+
 </body>
 </html>
