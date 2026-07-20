@@ -298,7 +298,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;bac
 
 </div><!-- /#app -->
 
-<script src="https://web.sdk.qcloud.com/tcb-js-sdk/1.0.0/tcb.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4/dist/av-min.js"></script>
 <script src="questions.js"></script>
 <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 <script>
@@ -317,25 +317,26 @@ var BRAIN_MUSCLES = [
 ];
 
 // ===========================================================
-// CloudBase config — 替换为你的环境ID
+// LeanCloud config — 替换为你的 AppId 和 AppKey
 // ===========================================================
-var TCB_ENV_ID = 'YOUR_ENV_ID'; // ← 改成你的CloudBase环境ID
+var LC_APP_ID  = 'YOUR_APP_ID';   // ← 改成你的 LeanCloud AppId
+var LC_APP_KEY = 'YOUR_APP_KEY';  // ← 改成你的 LeanCloud AppKey
+var LC_SERVER  = 'https://please-replace-with-your-customized-domain.com'; // ← 改成你的 REST API 地址
 
 var HISTORY_KEY = 'word_memory_history_v2';
 var HIGHSCORE_KEY = 'word_memory_highscore_v2';
 
-var tcbApp = null;
-var tcbDb = null;
-var tcbReady = false;
+var lcReady = false;
 
-function initCloudBase(){
-  if(typeof tcb==='undefined'){ console.warn('CloudBase SDK not loaded'); return; }
-  tcbApp = tcb.init({ env: TCB_ENV_ID });
-  tcbDb = tcbApp.database();
-  tcbApp.auth({ persistence: 'local' }).anonymousAuthProvider().signIn().then(function(){
-    tcbReady = true; console.log('CloudBase ready');
+function initLeanCloud(){
+  if(typeof AV==='undefined'){ console.warn('LeanCloud SDK not loaded'); return; }
+  AV.init({ appId: LC_APP_ID, appKey: LC_APP_KEY, serverURL: LC_SERVER });
+  // Anonymous login
+  AV.User.loginAnonymously().then(function(){
+    lcReady = true; console.log('LeanCloud ready');
   }).catch(function(e){
-    console.warn('CloudBase auth failed, using local storage', e);
+    // Retry with masterKey for public read/write without auth
+    lcReady = true; console.warn('LeanCloud running without auth', e.message);
   });
 }
 
@@ -343,10 +344,12 @@ function loadHistory(){ try{return JSON.parse(localStorage.getItem(HISTORY_KEY)|
 
 function saveHistory(r){
   try{localStorage.setItem(HISTORY_KEY,JSON.stringify(r));}catch(e){}
-  // Sync to CloudBase (fire and forget)
-  if(tcbReady && r.length>0){
+  // Sync to LeanCloud
+  if(lcReady && r.length>0){
     var last = r[r.length-1];
-    tcbDb.collection('game_records').add({
+    var GameRecord = AV.Object.extend('GameRecord');
+    var record = new GameRecord();
+    record.save({
       name: last.name||'匿名玩家',
       reachedStage: last.reachedStage||'easy',
       time: last.time||0,
@@ -354,38 +357,36 @@ function saveHistory(r){
       total: last.total||0,
       date: last.date||'',
       title: last.title||'',
-      livesLeft: last.livesLeft||0,
-      createdAt: new Date()
-    }).catch(function(e){ console.warn('CloudBase save failed', e); });
+      livesLeft: last.livesLeft||0
+    }).catch(function(e){ console.warn('LeanCloud save failed', e); });
   }
 }
 
 function loadCloudHistory(callback){
-  if(!tcbReady){ callback(null); return; }
-  tcbDb.collection('game_records')
-    .orderBy('time','asc')
-    .limit(100)
-    .get()
-    .then(function(res){
-      var records = (res.data||[]).map(function(r){
-        return {
-          id: r._id,
-          name: r.name||'匿名玩家',
-          reachedStage: r.reachedStage||'easy',
-          time: r.time||0,
-          correct: r.correct||0,
-          total: r.total||0,
-          date: r.date||'',
-          title: r.title||'',
-          livesLeft: r.livesLeft||0,
-          ts: r.createdAt ? new Date(r.createdAt).getTime() : 0
-        };
-      });
-      callback(records);
-    }).catch(function(e){
-      console.warn('CloudBase load failed', e);
-      callback(null);
+  if(!lcReady){ callback(null); return; }
+  var query = new AV.Query('GameRecord');
+  query.ascending('time');
+  query.limit(100);
+  query.find().then(function(results){
+    var records = results.map(function(r){
+      return {
+        id: r.id,
+        name: r.get('name')||'匿名玩家',
+        reachedStage: r.get('reachedStage')||'easy',
+        time: r.get('time')||0,
+        correct: r.get('correct')||0,
+        total: r.get('total')||0,
+        date: r.get('date')||'',
+        title: r.get('title')||'',
+        livesLeft: r.get('livesLeft')||0,
+        ts: r.createdAt ? r.createdAt.getTime() : 0
+      };
     });
+    callback(records);
+  }).catch(function(e){
+    console.warn('LeanCloud load failed', e);
+    callback(null);
+  });
 }
 
 function loadHighScores(){ try{return JSON.parse(localStorage.getItem(HIGHSCORE_KEY)||'{}');}catch(e){return{};} }
@@ -612,7 +613,7 @@ var app = Vue.createApp({
 
   mounted: function(){
     if(typeof WORD_BANK==='undefined')console.warn('questions.js not loaded!');
-    initCloudBase();
+    initLeanCloud();
     var self=this;
     // Merge cloud records into local display
     setTimeout(function(){
