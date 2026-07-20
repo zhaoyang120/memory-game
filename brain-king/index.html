@@ -486,6 +486,8 @@ var app = Vue.createApp({
     startQuiz: function(){
       cancelAnimationFrame(this.animFrameId); this.currentPage='quiz'; this.quizIndex=0; this.stageCorrect=0;
       this.quizLocked=false; this.selectedWrong='';
+      // 打乱出题顺序，不和记忆页展示顺序相同
+      this.stagePairs = shuffle(this.stagePairs);
       if(!this.quizStartTime) this.quizStartTime=Date.now();
       this.generateOptions();
     },
