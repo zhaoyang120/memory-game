@@ -298,6 +298,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;bac
 
 </div><!-- /#app -->
 
+<script src="https://web.sdk.qcloud.com/tcb-js-sdk/1.0.0/tcb.js"></script>
 <script src="questions.js"></script>
 <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 <script>
@@ -315,11 +316,78 @@ var BRAIN_MUSCLES = [
   { activeClass:'bg-purple-500/10 border-purple-400/30 brain-active', inactiveClass:'bg-white/[0.02] border-white/5' },
 ];
 
+// ===========================================================
+// CloudBase config — 替换为你的环境ID
+// ===========================================================
+var TCB_ENV_ID = 'YOUR_ENV_ID'; // ← 改成你的CloudBase环境ID
+
 var HISTORY_KEY = 'word_memory_history_v2';
 var HIGHSCORE_KEY = 'word_memory_highscore_v2';
 
+var tcbApp = null;
+var tcbDb = null;
+var tcbReady = false;
+
+function initCloudBase(){
+  if(typeof tcb==='undefined'){ console.warn('CloudBase SDK not loaded'); return; }
+  tcbApp = tcb.init({ env: TCB_ENV_ID });
+  tcbDb = tcbApp.database();
+  tcbApp.auth({ persistence: 'local' }).anonymousAuthProvider().signIn().then(function(){
+    tcbReady = true; console.log('CloudBase ready');
+  }).catch(function(e){
+    console.warn('CloudBase auth failed, using local storage', e);
+  });
+}
+
 function loadHistory(){ try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');}catch(e){return[];} }
-function saveHistory(r){ try{localStorage.setItem(HISTORY_KEY,JSON.stringify(r));}catch(e){} }
+
+function saveHistory(r){
+  try{localStorage.setItem(HISTORY_KEY,JSON.stringify(r));}catch(e){}
+  // Sync to CloudBase (fire and forget)
+  if(tcbReady && r.length>0){
+    var last = r[r.length-1];
+    tcbDb.collection('game_records').add({
+      name: last.name||'匿名玩家',
+      reachedStage: last.reachedStage||'easy',
+      time: last.time||0,
+      correct: last.correct||0,
+      total: last.total||0,
+      date: last.date||'',
+      title: last.title||'',
+      livesLeft: last.livesLeft||0,
+      createdAt: new Date()
+    }).catch(function(e){ console.warn('CloudBase save failed', e); });
+  }
+}
+
+function loadCloudHistory(callback){
+  if(!tcbReady){ callback(null); return; }
+  tcbDb.collection('game_records')
+    .orderBy('time','asc')
+    .limit(100)
+    .get()
+    .then(function(res){
+      var records = (res.data||[]).map(function(r){
+        return {
+          id: r._id,
+          name: r.name||'匿名玩家',
+          reachedStage: r.reachedStage||'easy',
+          time: r.time||0,
+          correct: r.correct||0,
+          total: r.total||0,
+          date: r.date||'',
+          title: r.title||'',
+          livesLeft: r.livesLeft||0,
+          ts: r.createdAt ? new Date(r.createdAt).getTime() : 0
+        };
+      });
+      callback(records);
+    }).catch(function(e){
+      console.warn('CloudBase load failed', e);
+      callback(null);
+    });
+}
+
 function loadHighScores(){ try{return JSON.parse(localStorage.getItem(HIGHSCORE_KEY)||'{}');}catch(e){return{};} }
 function saveHighScore(mode,time){ var s=loadHighScores(); if(!s[mode]||time<s[mode]){s[mode]=time;try{localStorage.setItem(HIGHSCORE_KEY,JSON.stringify(s));}catch(e){}} }
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
@@ -513,13 +581,57 @@ var app = Vue.createApp({
 
     fallbackCopy: function(text){ var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');this.showToast('✅ 战报已复制！');}catch(e){this.showToast('⚠️ 复制失败');}document.body.removeChild(ta); },
 
-    goHome: function(){ cancelAnimationFrame(this.animFrameId);this.memoryPhase=false;this.currentPage='home';this.showHistory=false;this.brainExpanded=false;this.won=false;this.stageIndex=0;this.history=loadHistory();this.highScores=loadHighScores(); },
+    goHome: function(){
+      cancelAnimationFrame(this.animFrameId);this.memoryPhase=false;
+      this.currentPage='home';this.showHistory=false;this.brainExpanded=false;this.won=false;this.stageIndex=0;
+      this.history=loadHistory();this.highScores=loadHighScores();
+      var self=this;
+      loadCloudHistory(function(cloudRecords){
+        if(cloudRecords&&cloudRecords.length>0){
+          var merged=self.history.slice(); var localIds={};
+          merged.forEach(function(r){ if(r.id)localIds[r.id]=true; });
+          cloudRecords.forEach(function(r){ if(!localIds[r.id]){merged.push(r);localIds[r.id]=true;} });
+          var tier={hard:3,medium:2,easy:1};
+          merged.sort(function(a,b){var da=tier[a.reachedStage]||0,db=tier[b.reachedStage]||0;if(db!==da)return db-da;return a.time-b.time;});
+          self.history=merged;
+        }
+      });
+    },
     retryGame: function(){ cancelAnimationFrame(this.animFrameId);this.memoryPhase=false;this.brainExpanded=false;this.startGame(); },
-    clearHistory: function(){ if(confirm('确定要清空所有历史战绩吗？')){localStorage.removeItem(HISTORY_KEY);localStorage.removeItem(HIGHSCORE_KEY);this.history=[];this.highScores={};} },
+    clearHistory: function(){
+      var self=this;
+      if(confirm('确定要清空所有历史战绩吗？（仅清除本地记录，云端保留）')){
+        localStorage.removeItem(HISTORY_KEY);localStorage.removeItem(HIGHSCORE_KEY);
+        self.history=[];self.highScores={};
+        // Reload from cloud
+        loadCloudHistory(function(cloudRecords){ if(cloudRecords)self.history=cloudRecords; });
+      }
+    },
     showToast: function(msg){ var self=this;this.toastMsg=msg;this.toastVisible=true;clearTimeout(this._toastTid);this._toastTid=setTimeout(function(){self.toastVisible=false;},2000); },
   },
 
-  mounted: function(){ if(typeof WORD_BANK==='undefined')console.warn('questions.js not loaded!'); },
+  mounted: function(){
+    if(typeof WORD_BANK==='undefined')console.warn('questions.js not loaded!');
+    initCloudBase();
+    var self=this;
+    // Merge cloud records into local display
+    setTimeout(function(){
+      loadCloudHistory(function(cloudRecords){
+        if(cloudRecords&&cloudRecords.length>0){
+          var merged = self.history.slice();
+          var localIds = {};
+          merged.forEach(function(r){ if(r.id)localIds[r.id]=true; });
+          cloudRecords.forEach(function(r){
+            if(!localIds[r.id]){ merged.push(r); localIds[r.id]=true; }
+          });
+          // Re-sort
+          var tier={hard:3,medium:2,easy:1};
+          merged.sort(function(a,b){ var da=tier[a.reachedStage]||0,db=tier[b.reachedStage]||0; if(db!==da)return db-da; return a.time-b.time; });
+          self.history = merged;
+        }
+      });
+    }, 500);
+  },
   beforeUnmount: function(){ cancelAnimationFrame(this.animFrameId); },
 });
 
