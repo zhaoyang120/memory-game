@@ -298,7 +298,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;bac
 
 </div><!-- /#app -->
 
-<script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4/dist/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="questions.js"></script>
 <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 <script>
@@ -317,76 +317,69 @@ var BRAIN_MUSCLES = [
 ];
 
 // ===========================================================
-// LeanCloud config — 替换为你的 AppId 和 AppKey
+// Supabase config — 已配置，直接使用
 // ===========================================================
-var LC_APP_ID  = 'YOUR_APP_ID';   // ← 改成你的 LeanCloud AppId
-var LC_APP_KEY = 'YOUR_APP_KEY';  // ← 改成你的 LeanCloud AppKey
-var LC_SERVER  = 'https://please-replace-with-your-customized-domain.com'; // ← 改成你的 REST API 地址
+var SB_URL = 'https://bxnskiyfzetikalxdgkc.supabase.co';
+var SB_KEY = 'sb_publishable_wsG3Dl5m46vh8wHkRBx9Pg_bBotbDRh';
 
 var HISTORY_KEY = 'word_memory_history_v2';
 var HIGHSCORE_KEY = 'word_memory_highscore_v2';
 
-var lcReady = false;
+var sbReady = false;
+var sbClient = null;
 
-function initLeanCloud(){
-  if(typeof AV==='undefined'){ console.warn('LeanCloud SDK not loaded'); return; }
-  AV.init({ appId: LC_APP_ID, appKey: LC_APP_KEY, serverURL: LC_SERVER });
-  // Anonymous login
-  AV.User.loginAnonymously().then(function(){
-    lcReady = true; console.log('LeanCloud ready');
-  }).catch(function(e){
-    // Retry with masterKey for public read/write without auth
-    lcReady = true; console.warn('LeanCloud running without auth', e.message);
-  });
+function initSupabase(){
+  if(typeof supabase==='undefined'){ console.warn('Supabase SDK not loaded'); return; }
+  sbClient = supabase.createClient(SB_URL, SB_KEY);
+  sbReady = true; console.log('Supabase ready');
 }
 
 function loadHistory(){ try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');}catch(e){return[];} }
 
 function saveHistory(r){
   try{localStorage.setItem(HISTORY_KEY,JSON.stringify(r));}catch(e){}
-  // Sync to LeanCloud
-  if(lcReady && r.length>0){
+  // Sync to Supabase (fire and forget)
+  if(sbReady && r.length>0){
     var last = r[r.length-1];
-    var GameRecord = AV.Object.extend('GameRecord');
-    var record = new GameRecord();
-    record.save({
+    sbClient.from('game_records').insert({
       name: last.name||'匿名玩家',
-      reachedStage: last.reachedStage||'easy',
+      reached_stage: last.reachedStage||'easy',
       time: last.time||0,
       correct: last.correct||0,
       total: last.total||0,
       date: last.date||'',
       title: last.title||'',
-      livesLeft: last.livesLeft||0
-    }).catch(function(e){ console.warn('LeanCloud save failed', e); });
+      lives_left: last.livesLeft||0
+    }).then(function(res){
+      if(res.error) console.warn('Supabase save failed', res.error);
+    });
   }
 }
 
 function loadCloudHistory(callback){
-  if(!lcReady){ callback(null); return; }
-  var query = new AV.Query('GameRecord');
-  query.ascending('time');
-  query.limit(100);
-  query.find().then(function(results){
-    var records = results.map(function(r){
-      return {
-        id: r.id,
-        name: r.get('name')||'匿名玩家',
-        reachedStage: r.get('reachedStage')||'easy',
-        time: r.get('time')||0,
-        correct: r.get('correct')||0,
-        total: r.get('total')||0,
-        date: r.get('date')||'',
-        title: r.get('title')||'',
-        livesLeft: r.get('livesLeft')||0,
-        ts: r.createdAt ? r.createdAt.getTime() : 0
-      };
+  if(!sbReady){ callback(null); return; }
+  sbClient.from('game_records')
+    .select('*')
+    .order('time', {ascending: true})
+    .limit(100)
+    .then(function(res){
+      if(res.error){ console.warn('Supabase load failed', res.error); callback(null); return; }
+      var records = (res.data||[]).map(function(r){
+        return {
+          id: r.id,
+          name: r.name||'匿名玩家',
+          reachedStage: r.reached_stage||'easy',
+          time: r.time||0,
+          correct: r.correct||0,
+          total: r.total||0,
+          date: r.date||'',
+          title: r.title||'',
+          livesLeft: r.lives_left||0,
+          ts: r.created_at ? new Date(r.created_at).getTime() : 0
+        };
+      });
+      callback(records);
     });
-    callback(records);
-  }).catch(function(e){
-    console.warn('LeanCloud load failed', e);
-    callback(null);
-  });
 }
 
 function loadHighScores(){ try{return JSON.parse(localStorage.getItem(HIGHSCORE_KEY)||'{}');}catch(e){return{};} }
@@ -613,7 +606,7 @@ var app = Vue.createApp({
 
   mounted: function(){
     if(typeof WORD_BANK==='undefined')console.warn('questions.js not loaded!');
-    initLeanCloud();
+    initSupabase();
     var self=this;
     // Merge cloud records into local display
     setTimeout(function(){
