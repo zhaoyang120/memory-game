@@ -222,6 +222,16 @@
     renderQuestion();
   }
 
+  // Fisher-Yates 洗牌
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
+  }
+
   function renderQuestion() {
     var q = state.currentQuiz.questions[state.currentIndex];
     var total = state.totalQuestions;
@@ -234,7 +244,10 @@
     var container = $('options-container');
     container.innerHTML = '';
 
-    q.options.forEach(function (opt) {
+    // 随机打乱选项顺序，避免正确答案总在第一个
+    var shuffledOptions = shuffle(q.options);
+
+    shuffledOptions.forEach(function (opt) {
       var btn = document.createElement('div');
       btn.className = 'option-btn';
       btn.textContent = opt;
