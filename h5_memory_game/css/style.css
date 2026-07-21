@@ -323,8 +323,21 @@ body::before {
    RESULT PAGE
    ============================================================ */
 .result-page {
-  align-items: center; padding-top: 20px; gap: 14px;
+  align-items: center; padding-top: 0;
   animation: fadeUp 0.5s ease;
+  display: flex; flex-direction: column;
+  height: 100%;
+}
+
+.result-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 14px;
+  padding-top: 20px;
+  padding-bottom: 12px;
 }
 
 .big-emoji { font-size: 54px; animation: float 2.6s ease-in-out infinite; }
@@ -357,13 +370,6 @@ body::before {
   text-align: center; padding: 12px; border-radius: 26px;
   font-size: 16px; font-weight: 800; letter-spacing: 2px;
   background: rgba(245,158,11,0.18); color: var(--gold);
-}
-.new-title-badge {
-  text-align: center; padding: 10px 18px; border-radius: 22px;
-  font-size: 14px; font-weight: 750;
-  background: rgba(244,63,94,0.14); color: var(--accent-lt);
-  border: 1px solid rgba(244,63,94,0.3);
-  animation: fadeUp 0.4s ease;
 }
 .share-card .watermark {
   text-align: center; font-size: 10px; color: var(--text-muted); letter-spacing: 2px;
@@ -408,8 +414,13 @@ body::before {
   margin-top: 4px;
 }
 
-/* Action buttons */
-.act-row { display: flex; gap: 10px; width: 100%; }
+/* Action buttons — 固定底部 */
+.act-row {
+  display: flex; gap: 10px; width: 100%;
+  flex-shrink: 0;
+  padding: 12px 0 8px;
+  background: linear-gradient(180deg, transparent 0%, var(--bg-deep) 30%);
+}
 .btn {
   flex: 1; padding: 14px; border-radius: 50px; border: none;
   font-size: 15px; font-weight: 750; cursor: pointer;

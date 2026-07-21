@@ -104,35 +104,36 @@
 
   <!-- ==================== 结算页 ==================== -->
   <div class="page result-page" id="pg-result">
-    <div class="big-emoji" id="res-icon">🎉</div>
-    <div class="title-line" id="res-title">挑战完成</div>
+    <div class="result-scroll">
+      <div class="big-emoji" id="res-icon">🎉</div>
+      <div class="title-line" id="res-title">挑战完成</div>
 
-    <!-- 战绩卡片 -->
-    <div class="share-card" id="share-card">
-      <div class="card-header">🏆 战 绩 卡 片 🏆</div>
-      <div class="stats-row">
-        <div class="stat-cell"><div class="big" id="st-correct">--</div><div class="label">本次答对</div></div>
-        <div class="stat-cell"><div class="big" id="st-accuracy">--</div><div class="label">正确率</div></div>
-        <div class="stat-cell"><div class="big" id="st-stage">--</div><div class="label">当前关卡</div></div>
-      </div>
-      <div class="rank-strip" id="rank-strip">过目小萌新</div>
-      <div class="new-title-badge" id="new-title-badge" style="display:none;"></div>
-      <div class="watermark">社群最强大脑系列 · 极限工作记忆</div>
-    </div>
-
-    <!-- 二维码卡片 -->
-    <div class="qr-section" id="qr-section">
-      <div class="qr-title">🎁 参与有礼</div>
-      <div class="qr-img-wrap">
-        <img id="qr-img" src="images/qr_code.png" alt="联系助理二维码"
-             onerror="this.style.display='none';document.getElementById('qr-placeholder').style.display='flex';">
-        <div id="qr-placeholder" style="display:none;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;color:var(--text-muted);font-size:12px;text-align:center;line-height:1.6;">
-          📷<br>请将二维码放入<br><b>images/qr_code.png</b>
+      <!-- 战绩卡片 -->
+      <div class="share-card" id="share-card">
+        <div class="card-header">🏆 战 绩 卡 片 🏆</div>
+        <div class="stats-row">
+          <div class="stat-cell"><div class="big" id="st-correct">--</div><div class="label">本次答对</div></div>
+          <div class="stat-cell"><div class="big" id="st-accuracy">--</div><div class="label">正确率</div></div>
+          <div class="stat-cell"><div class="big" id="st-stage">--</div><div class="label">当前关卡</div></div>
         </div>
+        <div class="rank-strip" id="rank-strip">过目小萌新</div>
+        <div class="watermark">社群最强大脑系列 · 极限工作记忆</div>
       </div>
-      <div class="qr-hint">
-        感谢参与脑力游戏<br>
-        <span class="qr-highlight">联系助理获取 5 元商城现金券</span>
+
+      <!-- 二维码卡片 -->
+      <div class="qr-section" id="qr-section">
+        <div class="qr-title">🎁 参与有礼</div>
+        <div class="qr-img-wrap">
+          <img id="qr-img" src="images/qr_code.png" alt="联系助理二维码"
+               onerror="this.style.display='none';document.getElementById('qr-placeholder').style.display='flex';">
+          <div id="qr-placeholder" style="display:none;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;color:var(--text-muted);font-size:12px;text-align:center;line-height:1.6;">
+            📷<br>请将二维码放入<br><b>images/qr_code.png</b>
+          </div>
+        </div>
+        <div class="qr-hint">
+          感谢参与脑力游戏<br>
+          <span class="qr-highlight">联系助理获取 5 元商城现金券</span>
+        </div>
       </div>
     </div>
 

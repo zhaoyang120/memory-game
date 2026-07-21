@@ -317,14 +317,14 @@
     state.nextQuiz = window.getRandomQuiz(state.stage + 1);
 
     // 渲染结算
-    renderResult(allCorrect, newTitle);
+    renderResult(allCorrect);
     saveSave();
     updateHomeUI();
 
     switchPage(pgResult);
   }
 
-  function renderResult(allCorrect, newTitle) {
+  function renderResult(allCorrect) {
     // icon + title
     if (allCorrect && state.correctCount === state.totalQuestions) {
       $('res-icon').textContent = '🏆';
@@ -342,17 +342,8 @@
     $('st-accuracy').textContent = Math.round(state.correctCount / state.totalQuestions * 100) + '%';
     $('st-stage').textContent = '第 ' + state.stage + ' 关';
 
-    // 称号
+    // 当前称号
     $('rank-strip').textContent = state.equippedTitle;
-
-    // 新称号
-    var badge = $('new-title-badge');
-    if (newTitle) {
-      badge.textContent = '🎉 解锁新称号：【' + newTitle + '】';
-      badge.style.display = 'block';
-    } else {
-      badge.style.display = 'none';
-    }
 
     // 按钮
     if (allCorrect) {
