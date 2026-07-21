@@ -1,129 +1,156 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>极限工作记忆 - 30秒挑战你的脑力极限</title>
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>极限工作记忆 · 社群最强大脑系列</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div id="app">
 
-    <!-- ==================== 首页 ==================== -->
-    <div id="page-home" class="page active">
-      <div class="container">
-        <div class="user-card">
-          <div class="avatar" id="avatar-text">🧠</div>
-          <div class="user-info">
-            <div class="nickname">脑力挑战者</div>
-            <div class="title-tag" id="home-title-tag">称号：过目小萌新</div>
-          </div>
-        </div>
+<div class="app" id="app">
 
-        <div class="game-intro">
-          <div class="main-title">极限工作记忆</div>
-          <div class="sub-title">30秒挑战你的脑力极限</div>
-        </div>
+  <!-- ==================== 首页 ==================== -->
+  <div class="page home-page active" id="pg-home">
+    <div class="brand-block">
+      <span class="emoji">📖</span>
+      <h1>极限工作记忆</h1>
+      <p class="tagline">⚡ 30秒挑战你的脑力极限 ⚡</p>
+    </div>
 
-        <div class="stat-card">
-          <div class="stat-item">
-            <div class="stat-num" id="home-max-stage">0</div>
-            <div class="stat-label">历史最高通关</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-num" id="home-title-count">1</div>
-            <div class="stat-label">已解锁称号</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-num" id="home-total-correct">0</div>
-            <div class="stat-label">累计答对</div>
-          </div>
-        </div>
+    <div class="nickname-wrap">
+      <label class="nick-label" for="nickname-input">💬 你的名称</label>
+      <input type="text" class="nickname-input" id="nickname-input"
+             placeholder="请输入你的昵称" maxlength="16" autocomplete="name">
+    </div>
 
-        <button class="btn-primary" id="btn-start">开始挑战</button>
-        <div class="difficulty-hint">第 1 关 · 3 道题 · 约 80 字短文</div>
+    <button class="start-btn" id="btn-start">开 始 挑 战</button>
+
+    <div class="level-preview">
+      <div class="level-row">
+        <span class="lv-icon">🌱</span>
+        <div class="lv-info"><div class="lv-title">第 1 关</div><div class="lv-desc">约 80 字短文 · 回答 3 题</div></div>
+        <span class="lv-tag">基础</span>
+      </div>
+      <div class="level-row">
+        <span class="lv-icon">⚡</span>
+        <div class="lv-info"><div class="lv-title">第 2 关</div><div class="lv-desc">约 130 字短文 · 回答 4 题</div></div>
+        <span class="lv-tag">进阶</span>
+      </div>
+      <div class="level-row">
+        <span class="lv-icon">🔥</span>
+        <div class="lv-info"><div class="lv-title">第 3 关</div><div class="lv-desc">约 170 字短文 · 回答 6 题</div></div>
+        <span class="lv-tag">高难</span>
       </div>
     </div>
 
-    <!-- ==================== 记忆页 ==================== -->
-    <div id="page-memory" class="page">
-      <div class="container">
-        <div class="header-bar">
-          <div class="stage-num" id="memory-stage">第 1 关</div>
-          <div class="timer-box" id="timer-box">
-            <svg class="timer-ring" viewBox="0 0 100 100">
-              <circle class="timer-ring-bg" cx="50" cy="50" r="42"></circle>
-              <circle class="timer-ring-progress" cx="50" cy="50" r="42" id="timer-circle"></circle>
-            </svg>
-            <span class="timer-text" id="timer-text">30s</span>
-          </div>
-        </div>
-
-        <div class="story-card">
-          <div class="story-title">请在 <strong>30 秒</strong> 内记住以下内容</div>
-          <div class="story-content" id="story-text"></div>
-        </div>
-
-        <button class="btn-primary" id="btn-finish-early">记好了，直接答题</button>
-        <div class="hint-text">时间到将自动进入答题</div>
-      </div>
+    <div class="home-stats" id="home-stats">
+      <div class="stat-cell"><div class="big" id="s-max-stage">0</div><div class="label">最高通关</div></div>
+      <div class="stat-cell"><div class="big" id="s-title-count">1</div><div class="label">已解锁称号</div></div>
+      <div class="stat-cell"><div class="big" id="s-total-correct">0</div><div class="label">累计答对</div></div>
     </div>
 
-    <!-- ==================== 答题页 ==================== -->
-    <div id="page-quiz" class="page">
-      <div class="container">
-        <div class="progress-bar">
-          <div class="progress-fill" id="progress-fill"></div>
-        </div>
-        <div class="progress-label" id="progress-label">1 / 3</div>
-
-        <div class="question-card">
-          <div class="question-text" id="question-text"></div>
-        </div>
-
-        <div class="options-container" id="options-container"></div>
-      </div>
+    <div class="title-display" id="title-display">
+      <span class="title-badge" id="home-title-badge">🏅 过目小萌新</span>
     </div>
 
-    <!-- ==================== 结算页 ==================== -->
-    <div id="page-result" class="page">
-      <div class="container">
-        <div class="result-header">
-          <div class="result-icon" id="result-icon">🎉</div>
-          <div class="result-title" id="result-title">挑战完成</div>
-          <div class="result-score" id="result-score"></div>
-          <div class="new-title-badge" id="new-title-badge" style="display:none;"></div>
-        </div>
-
-        <div class="promo-card">
-          <div class="promo-title">🎁 参与有礼</div>
-          <div class="promo-subtitle">联系助理获取 5 元商城现金券</div>
-          <img class="qr-code" src="images/qr_code.png" alt="联系助理二维码" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
-          <div class="qr-placeholder" style="display:none;">
-            <div style="font-size:80rpx; opacity:0.3;">📱</div>
-            <div style="color:#999;margin-top:8px;">请将二维码放入 images/qr_code.png</div>
-          </div>
-          <div class="promo-tips">长按识别或截图保存二维码</div>
-        </div>
-
-        <button class="btn-primary" id="btn-next">进入下一关</button>
-        <button class="btn-secondary" id="btn-retry">再次挑战</button>
-        <button class="btn-outline" id="btn-share">📤 分享给朋友</button>
-        <button class="btn-text" id="btn-home">返回首页</button>
-      </div>
-    </div>
-
-    <!-- ==================== 分享引导浮层 ==================== -->
-    <div id="share-overlay" class="share-overlay" style="display:none;">
-      <div class="share-arrow"></div>
-      <div class="share-text">点击右上角 ⋯<br>分享给朋友</div>
-    </div>
-
+    <p class="home-footer">🧠 社群最强大脑系列 · 极限工作记忆</p>
   </div>
 
-  <script src="js/quizBank.js"></script>
-  <script src="js/game.js"></script>
+  <!-- ==================== 记忆页 ==================== -->
+  <div class="page" id="pg-memory">
+    <div class="game-topbar">
+      <div class="level-badge" id="badge-stage">第 1 关</div>
+      <div class="ring-wrap" id="ring-wrap">
+        <svg viewBox="0 0 112 112">
+          <circle class="ring-bg" cx="56" cy="56" r="50"/>
+          <circle class="ring-fg" id="ring-fg" cx="56" cy="56" r="50"
+                  stroke-dasharray="314.159" stroke-dashoffset="0"/>
+        </svg>
+        <div class="ring-text" id="ring-txt">30s</div>
+      </div>
+    </div>
+
+    <div class="memory-main">
+      <p class="hint-line">请在 <b>30 秒</b> 内记住以下内容</p>
+
+      <div class="story-card" id="story-card">
+        <div class="story-content" id="story-text"></div>
+      </div>
+
+      <button class="skip-btn" id="btn-skip">记好了，直接答题 →</button>
+    </div>
+  </div>
+
+  <!-- ==================== 答题页 ==================== -->
+  <div class="page" id="pg-quiz">
+    <div class="game-topbar">
+      <div class="level-badge" id="badge-quiz-stage">第 1 关</div>
+      <div class="progress-text" id="progress-label">1 / 3</div>
+    </div>
+
+    <div class="quiz-main">
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+
+      <div class="question-card">
+        <div class="question-text" id="question-text"></div>
+      </div>
+
+      <div class="options-grid" id="options-container"></div>
+    </div>
+  </div>
+
+  <!-- ==================== 结算页 ==================== -->
+  <div class="page result-page" id="pg-result">
+    <div class="big-emoji" id="res-icon">🎉</div>
+    <div class="title-line" id="res-title">挑战完成</div>
+
+    <!-- 战绩卡片 -->
+    <div class="share-card" id="share-card">
+      <div class="card-header">🏆 战 绩 卡 片 🏆</div>
+      <div class="stats-row">
+        <div class="stat-cell"><div class="big" id="st-correct">--</div><div class="label">本次答对</div></div>
+        <div class="stat-cell"><div class="big" id="st-accuracy">--</div><div class="label">正确率</div></div>
+        <div class="stat-cell"><div class="big" id="st-stage">--</div><div class="label">当前关卡</div></div>
+      </div>
+      <div class="rank-strip" id="rank-strip">过目小萌新</div>
+      <div class="new-title-badge" id="new-title-badge" style="display:none;"></div>
+      <div class="watermark">社群最强大脑系列 · 极限工作记忆</div>
+    </div>
+
+    <!-- 二维码卡片 -->
+    <div class="qr-section" id="qr-section">
+      <div class="qr-title">🎁 参与有礼</div>
+      <div class="qr-img-wrap">
+        <img id="qr-img" src="images/qr_code.png" alt="联系助理二维码"
+             onerror="this.style.display='none';document.getElementById('qr-placeholder').style.display='flex';">
+        <div id="qr-placeholder" style="display:none;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;color:var(--text-muted);font-size:12px;text-align:center;line-height:1.6;">
+          📷<br>请将二维码放入<br><b>images/qr_code.png</b>
+        </div>
+      </div>
+      <div class="qr-hint">
+        感谢参与脑力游戏<br>
+        <span class="qr-highlight">联系助理获取 5 元商城现金券</span>
+      </div>
+    </div>
+
+    <div class="act-row">
+      <button class="btn btn-ghost" id="btn-home-result">🏠 返回</button>
+      <button class="btn btn-solid" id="btn-next-round">下一关 →</button>
+      <button class="btn btn-solid" id="btn-retry-round" style="display:none;">🔄 再次挑战</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- toast -->
+<div class="toast-overlay" id="toast-overlay">
+  <div class="toast-icon" id="toast-icon"></div>
+</div>
+
+<script src="js/quizBank.js"></script>
+<script src="js/game.js"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 /**
- * 极限工作记忆 - H5 单页面游戏核心逻辑
- * 视图切换 · 30秒倒计时 · 乱序抽题 · 评分 · 称号解锁 · localStorage
+ * 极限工作记忆 · 社群最强大脑系列
+ * 核心游戏逻辑 — 暗色主题版
  */
 (function () {
   'use strict';
@@ -27,22 +27,35 @@
     equippedTitle: '过目小萌新',
     timeLeft: 30,
     timerInterval: null,
-    answerLocked: false
+    answerLocked: false,
+    playerName: ''
   };
 
-  // ==================== DOM 快捷引用 ====================
+  // ==================== DOM 引用 ====================
   var $ = function (id) { return document.getElementById(id); };
+  var pgHome, pgMemory, pgQuiz, pgResult;
+
+  // ==================== 常量 ====================
+  var RING_CIRCUM = 2 * Math.PI * 50; // 314.159
+  var NICK_KEY = 'mg_story_nick';
+  var SAVE_KEY = 'memory_game_story_save';
 
   // ==================== 初始化 ====================
   function init() {
-    loadFromStorage();
-    updateHomeStats();
+    pgHome   = $('pg-home');
+    pgMemory = $('pg-memory');
+    pgQuiz   = $('pg-quiz');
+    pgResult = $('pg-result');
+
+    loadSave();
+    loadNickname();
+    updateHomeUI();
     bindEvents();
-    showPage('home');
+    switchPage(pgHome);
   }
 
-  // ==================== localStorage ====================
-  function saveToStorage() {
+  // ==================== 持久化 ====================
+  function saveSave() {
     try {
       var data = {
         maxStage: state.maxStage,
@@ -50,96 +63,135 @@
         unlockedTitles: state.unlockedTitles,
         equippedTitle: state.equippedTitle
       };
-      localStorage.setItem('memory_game_save', JSON.stringify(data));
-    } catch (e) { /* 无痕模式可能抛异常，忽略 */ }
+      localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    } catch (e) {}
   }
 
-  function loadFromStorage() {
+  function loadSave() {
     try {
-      var raw = localStorage.getItem('memory_game_save');
+      var raw = localStorage.getItem(SAVE_KEY);
       if (raw) {
-        var data = JSON.parse(raw);
-        if (data.maxStage != null) state.maxStage = data.maxStage;
-        if (data.totalCorrect != null) state.totalCorrect = data.totalCorrect;
-        if (data.unlockedTitles) state.unlockedTitles = data.unlockedTitles;
-        if (data.equippedTitle) state.equippedTitle = data.equippedTitle;
+        var d = JSON.parse(raw);
+        if (d.maxStage != null) state.maxStage = d.maxStage;
+        if (d.totalCorrect != null) state.totalCorrect = d.totalCorrect;
+        if (d.unlockedTitles) state.unlockedTitles = d.unlockedTitles;
+        if (d.equippedTitle) state.equippedTitle = d.equippedTitle;
       }
-    } catch (e) { /* 忽略 */ }
+    } catch (e) {}
+  }
+
+  function loadNickname() {
+    try {
+      var n = localStorage.getItem(NICK_KEY);
+      if (n) {
+        state.playerName = n;
+        $('nickname-input').value = n;
+      }
+    } catch (e) {}
+  }
+
+  function saveNickname(name) {
+    state.playerName = name;
+    try { localStorage.setItem(NICK_KEY, name); } catch (e) {}
   }
 
   // ==================== 页面切换 ====================
-  function showPage(name) {
-    var pages = document.querySelectorAll('.page');
-    for (var i = 0; i < pages.length; i++) {
-      pages[i].classList.remove('active');
-    }
-    var target = $('page-' + name);
-    if (target) target.classList.add('active');
+  function switchPage(page) {
+    pgHome.classList.remove('active');
+    pgMemory.classList.remove('active');
+    pgQuiz.classList.remove('active');
+    pgResult.classList.remove('active');
+    page.classList.add('active');
     window.scrollTo(0, 0);
   }
 
-  // ==================== 首页更新 ====================
-  function updateHomeStats() {
-    $('home-title-tag').textContent = '称号：' + state.equippedTitle;
-    $('home-max-stage').textContent = state.maxStage;
-    $('home-title-count').textContent = state.unlockedTitles.length;
-    $('home-total-correct').textContent = state.totalCorrect;
+  // ==================== 首页 UI 更新 ====================
+  function updateHomeUI() {
+    $('s-max-stage').textContent = state.maxStage;
+    $('s-title-count').textContent = state.unlockedTitles.length;
+    $('s-total-correct').textContent = state.totalCorrect;
+    $('home-title-badge').textContent = '🏅 ' + state.equippedTitle;
+  }
+
+  // ==================== Toast ====================
+  function flashToast(emoji) {
+    var overlay = $('toast-overlay');
+    $('toast-icon').textContent = emoji;
+    overlay.classList.add('show');
+    clearTimeout(state._toastTid);
+    state._toastTid = setTimeout(function () {
+      overlay.classList.remove('show');
+    }, 620);
   }
 
   // ==================== 事件绑定 ====================
   function bindEvents() {
-    $('btn-start').addEventListener('click', startGame);
-    $('btn-finish-early').addEventListener('click', finishMemoryEarly);
-    $('btn-next').addEventListener('click', nextStage);
-    $('btn-retry').addEventListener('click', retryStage);
-    $('btn-home').addEventListener('click', goHome);
-    $('btn-share').addEventListener('click', shareGame);
+    $('btn-start').addEventListener('click', launchGame);
+    $('btn-skip').addEventListener('click', skipMemory);
+    $('btn-next-round').addEventListener('click', nextStage);
+    $('btn-retry-round').addEventListener('click', retryStage);
+    $('btn-home-result').addEventListener('click', goHome);
 
-    // 点击分享浮层关闭
-    $('share-overlay').addEventListener('click', function () {
-      this.style.display = 'none';
-    });
+    // 移动端 touch 优化
+    $('btn-start').addEventListener('touchstart', function (e) {
+      e.preventDefault(); this.click();
+    }, { passive: false });
+    $('btn-skip').addEventListener('touchstart', function (e) {
+      e.preventDefault(); this.click();
+    }, { passive: false });
   }
 
   // ==================== 开始游戏 ====================
-  function startGame() {
+  function launchGame() {
+    var name = $('nickname-input').value.trim();
+    if (!name) {
+      var inp = $('nickname-input');
+      inp.focus();
+      inp.style.borderColor = 'var(--accent)';
+      inp.style.boxShadow = '0 0 0 3px rgba(244,63,94,0.2)';
+      setTimeout(function () {
+        inp.style.borderColor = '';
+        inp.style.boxShadow = '';
+      }, 1500);
+      return;
+    }
+    saveNickname(name);
+
     state.stage = 1;
-    state.currentQuiz = getRandomQuiz(1);
+    state.currentQuiz = window.getRandomQuiz(1);
     state.nextQuiz = null;
     state.correctCount = 0;
 
-    // 记忆页
-    $('memory-stage').textContent = '第 ' + state.stage + ' 关';
+    $('badge-stage').textContent = '第 1 关';
     $('story-text').textContent = state.currentQuiz.storyText;
 
-    showPage('memory');
+    switchPage(pgMemory);
     startTimer();
   }
 
-  // ==================== 倒计时 ====================
+  // ==================== 30 秒倒计时 ====================
   function startTimer() {
     state.timeLeft = 30;
-    updateTimerDisplay();
+    updateTimerUI();
 
-    var timerBox = $('timer-box');
-    var timerText = $('timer-text');
-    var timerCircle = $('timer-circle');
-    var circumference = 263.89; // 2π × 42
+    var ringFg = $('ring-fg');
+    var ringTxt = $('ring-txt');
+    ringFg.classList.remove('warning');
+    ringTxt.classList.remove('warning');
+    ringFg.style.strokeDashoffset = '0';
+    ringFg.style.stroke = 'var(--primary-lt)';
 
     clearInterval(state.timerInterval);
-
     state.timerInterval = setInterval(function () {
       state.timeLeft--;
-      updateTimerDisplay();
+      updateTimerUI();
 
-      // 更新圆环
-      var offset = circumference * (1 - state.timeLeft / 30);
-      timerCircle.style.strokeDashoffset = offset;
+      var offset = RING_CIRCUM * (1 - state.timeLeft / 30);
+      ringFg.style.strokeDashoffset = offset.toFixed(2);
 
-      // 警告状态
       if (state.timeLeft <= 5) {
-        timerCircle.classList.add('warning');
-        timerText.classList.add('warning');
+        ringFg.classList.add('warning');
+        ringTxt.classList.add('warning');
       }
 
       if (state.timeLeft <= 0) {
@@ -149,23 +201,24 @@
     }, 1000);
   }
 
-  function updateTimerDisplay() {
-    $('timer-text').textContent = state.timeLeft + 's';
+  function updateTimerUI() {
+    $('ring-txt').textContent = state.timeLeft + 's';
   }
 
-  function finishMemoryEarly() {
+  function skipMemory() {
     clearInterval(state.timerInterval);
     goToQuiz();
   }
 
-  // ==================== 进入答题 ====================
+  // ==================== 答题 ====================
   function goToQuiz() {
     clearInterval(state.timerInterval);
     state.totalQuestions = state.currentQuiz.questions.length;
     state.currentIndex = 0;
     state.answerLocked = false;
 
-    showPage('quiz');
+    $('badge-quiz-stage').textContent = '第 ' + state.stage + ' 关';
+    switchPage(pgQuiz);
     renderQuestion();
   }
 
@@ -174,14 +227,10 @@
     var total = state.totalQuestions;
     var idx = state.currentIndex;
 
-    // 进度条
     $('progress-fill').style.width = ((idx + 1) / total * 100) + '%';
     $('progress-label').textContent = (idx + 1) + ' / ' + total;
-
-    // 题目
     $('question-text').textContent = q.questionText;
 
-    // 选项
     var container = $('options-container');
     container.innerHTML = '';
 
@@ -192,11 +241,13 @@
       btn.addEventListener('click', function () {
         selectOption(opt, btn);
       });
+      btn.addEventListener('touchstart', function (e) {
+        e.preventDefault(); this.click();
+      }, { passive: false });
       container.appendChild(btn);
     });
   }
 
-  // ==================== 选择选项 ====================
   function selectOption(option, clickedBtn) {
     if (state.answerLocked) return;
     state.answerLocked = true;
@@ -210,7 +261,6 @@
       allBtns[i].classList.add('disabled');
     }
 
-    // 标记选中的
     if (isCorrect) {
       clickedBtn.classList.add('correct');
       state.correctCount++;
@@ -225,7 +275,8 @@
       }
     }
 
-    // 延迟进入下一题
+    flashToast(isCorrect ? '✅' : '💔');
+
     setTimeout(function () {
       state.currentIndex++;
       state.answerLocked = false;
@@ -235,69 +286,69 @@
       } else {
         finishQuiz();
       }
-    }, isCorrect ? 600 : 1000);
+    }, isCorrect ? 600 : 1100);
   }
 
-  // ==================== 完成答题 ====================
+  // ==================== 结算 ====================
   function finishQuiz() {
     var allCorrect = (state.correctCount === state.totalQuestions);
 
-    // 更新最高关卡
     if (allCorrect && state.stage > state.maxStage) {
       state.maxStage = state.stage;
     }
 
-    // 累计答对
     state.totalCorrect += state.correctCount;
-
-    // 检查称号
     var newTitle = checkTitleUnlock();
 
     // 预加载下一关
-    state.nextQuiz = getRandomQuiz(state.stage + 1);
+    state.nextQuiz = window.getRandomQuiz(state.stage + 1);
 
-    // 渲染结算页
+    // 渲染结算
     renderResult(allCorrect, newTitle);
+    saveSave();
+    updateHomeUI();
 
-    // 持久化
-    saveToStorage();
-
-    showPage('result');
+    switchPage(pgResult);
   }
 
   function renderResult(allCorrect, newTitle) {
-    // 图标
-    if (allCorrect) {
-      $('result-icon').textContent = '🏆';
-      $('result-title').textContent = '完美通关！';
+    // icon + title
+    if (allCorrect && state.correctCount === state.totalQuestions) {
+      $('res-icon').textContent = '🏆';
+      $('res-title').textContent = '完美通关！';
+    } else if (state.correctCount >= state.totalQuestions * 0.6) {
+      $('res-icon').textContent = '🥇';
+      $('res-title').textContent = '表现不错！';
     } else {
-      $('result-icon').textContent = '🎉';
-      $('result-title').textContent = '挑战完成';
+      $('res-icon').textContent = '💪';
+      $('res-title').textContent = '继续加油！';
     }
 
-    $('result-score').textContent =
-      '本次答对 ' + state.correctCount + ' / ' + state.totalQuestions + ' 题';
+    // 数据
+    $('st-correct').textContent = state.correctCount + '/' + state.totalQuestions;
+    $('st-accuracy').textContent = Math.round(state.correctCount / state.totalQuestions * 100) + '%';
+    $('st-stage').textContent = '第 ' + state.stage + ' 关';
+
+    // 称号
+    $('rank-strip').textContent = state.equippedTitle;
 
     // 新称号
     var badge = $('new-title-badge');
     if (newTitle) {
       badge.textContent = '🎉 解锁新称号：【' + newTitle + '】';
-      badge.style.display = 'inline-block';
+      badge.style.display = 'block';
     } else {
       badge.style.display = 'none';
     }
 
     // 按钮
-    var btnNext = $('btn-next');
-    var btnRetry = $('btn-retry');
-
     if (allCorrect) {
-      btnNext.style.display = 'block';
-      btnNext.textContent = '进入第 ' + (state.stage + 1) + ' 关 →';
-      btnRetry.style.display = 'none';
+      $('btn-next-round').style.display = 'block';
+      $('btn-retry-round').style.display = 'none';
+      $('btn-next-round').textContent = '进入第 ' + (state.stage + 1) + ' 关 →';
     } else {
-      btnNext.style.display = 'none';
-      btnRetry.style.display = 'block';
+      $('btn-next-round').style.display = 'none';
+      $('btn-retry-round').style.display = 'block';
     }
   }
 
@@ -311,7 +362,7 @@
         state.unlockedTitles.push(newTitle);
       }
     }
-    // 装备最高称号
+    // 装备最高
     var best = TITLES[0].name;
     for (var j = 0; j < TITLES.length; j++) {
       if (state.unlockedTitles.indexOf(TITLES[j].name) !== -1) {
@@ -319,7 +370,6 @@
       }
     }
     state.equippedTitle = best;
-    updateHomeStats();
     return newTitle;
   }
 
@@ -330,100 +380,44 @@
     state.nextQuiz = null;
     state.correctCount = 0;
 
-    $('memory-stage').textContent = '第 ' + state.stage + ' 关';
+    $('badge-stage').textContent = '第 ' + state.stage + ' 关';
     $('story-text').textContent = state.currentQuiz.storyText;
 
-    // 重置计时器样式
-    var circle = $('timer-circle');
-    var text = $('timer-text');
-    circle.classList.remove('warning');
-    text.classList.remove('warning');
-    circle.style.strokeDashoffset = '0';
+    // 重置计时器
+    var ringFg = $('ring-fg');
+    var ringTxt = $('ring-txt');
+    ringFg.classList.remove('warning');
+    ringTxt.classList.remove('warning');
+    ringFg.style.strokeDashoffset = '0';
+    ringFg.style.stroke = 'var(--primary-lt)';
 
-    showPage('memory');
+    switchPage(pgMemory);
     startTimer();
   }
 
   function retryStage() {
-    state.currentQuiz = getRandomQuiz(state.stage);
+    state.currentQuiz = window.getRandomQuiz(state.stage);
     state.nextQuiz = null;
     state.correctCount = 0;
 
-    $('memory-stage').textContent = '第 ' + state.stage + ' 关';
+    $('badge-stage').textContent = '第 ' + state.stage + ' 关';
     $('story-text').textContent = state.currentQuiz.storyText;
 
-    var circle = $('timer-circle');
-    var text = $('timer-text');
-    circle.classList.remove('warning');
-    text.classList.remove('warning');
-    circle.style.strokeDashoffset = '0';
+    var ringFg = $('ring-fg');
+    var ringTxt = $('ring-txt');
+    ringFg.classList.remove('warning');
+    ringTxt.classList.remove('warning');
+    ringFg.style.strokeDashoffset = '0';
+    ringFg.style.stroke = 'var(--primary-lt)';
 
-    showPage('memory');
+    switchPage(pgMemory);
     startTimer();
   }
 
   function goHome() {
     clearInterval(state.timerInterval);
-    updateHomeStats();
-    showPage('home');
-  }
-
-  // ==================== 分享 ====================
-  function shareGame() {
-    var shareData = {
-      title: '极限工作记忆 - 30秒挑战你的脑力极限',
-      text: '我已解锁【' + state.equippedTitle + '】称号！累计答对 ' + state.totalCorrect + ' 题，快来挑战我吧！',
-      url: window.location.href
-    };
-
-    // 优先使用 Web Share API（移动端原生分享）
-    if (navigator.share) {
-      navigator.share(shareData).catch(function () {});
-    } else {
-      // 桌面端 / 不支持 Web Share → 显示引导浮层
-      var overlay = $('share-overlay');
-      overlay.style.display = 'block';
-      setTimeout(function () {
-        overlay.style.display = 'none';
-      }, 3000);
-
-      // 同时尝试复制链接
-      copyToClipboard(window.location.href);
-    }
-  }
-
-  function copyToClipboard(text) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(function () {
-        showToast('链接已复制，粘贴给朋友吧！');
-      }).catch(function () {});
-    } else {
-      // fallback
-      var ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      try { document.execCommand('copy'); showToast('链接已复制！'); } catch (e) {}
-      document.body.removeChild(ta);
-    }
-  }
-
-  function showToast(msg) {
-    var toast = document.createElement('div');
-    toast.textContent = msg;
-    toast.style.cssText =
-      'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);' +
-      'background:rgba(0,0,0,0.78);color:#fff;padding:14px 28px;' +
-      'border-radius:24px;font-size:26rpx;z-index:9999;' +
-      'animation:fadeSlideIn 0.3s ease;white-space:nowrap;';
-    document.body.appendChild(toast);
-    setTimeout(function () {
-      toast.style.opacity = '0';
-      toast.style.transition = 'opacity 0.3s';
-      setTimeout(function () { document.body.removeChild(toast); }, 300);
-    }, 2000);
+    updateHomeUI();
+    switchPage(pgHome);
   }
 
   // ==================== 启动 ====================
