@@ -1,129 +1,1316 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>极限工作记忆 - 30秒挑战你的脑力极限</title>
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>社群最强大脑：瞬时记忆挑战</title>
+<style>
+/* ============================================================
+   CSS Reset & Design Tokens
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-deep:    #06060f;
+  --bg-card:    #0f0f23;
+  --bg-surface: #16163a;
+  --border:     rgba(99, 102, 241, 0.30);
+  --border-glow: rgba(99, 102, 241, 0.55);
+  --primary:    #6366f1;
+  --primary-lt: #818cf8;
+  --accent:     #f43f5e;
+  --accent-lt:  #fb7185;
+  --gold:       #f59e0b;
+  --success:    #22c55e;
+  --text:       #e8ecf4;
+  --text-dim:   #94a3b8;
+  --text-muted: #5b6b88;
+  --radius:     18px;
+  --radius-sm:  12px;
+  --font-mono:  'SF Mono', 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+  --font-sans:  -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+                'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--font-sans);
+  background: var(--bg-deep);
+  color: var(--text);
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 0%,   rgba(99,102,241,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 100%, rgba(244,63,94,0.07)  0%, transparent 55%),
+    radial-gradient(ellipse 40% 35% at 20% 80%, rgba(34,197,94,0.05)   0%, transparent 55%);
+}
+
+/* ============================================================
+   App Shell
+   ============================================================ */
+.app {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 430px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: 20px 16px 28px;
+  display: flex; flex-direction: column;
+}
+
+/* ============================================================
+   Page switching
+   ============================================================ */
+.page { display: none; flex-direction: column; flex: 1; }
+.page.active { display: flex; }
+
+/* ============================================================
+   HOME PAGE
+   ============================================================ */
+.home-page {
+  align-items: center; justify-content: flex-start;
+  gap: 20px; padding-top: 28px;
+  animation: fadeUp 0.55s ease;
+}
+
+.brand-block { text-align: center; }
+
+.brand-block .emoji {
+  display: block; font-size: 52px; margin-bottom: 10px;
+  animation: float 2.6s ease-in-out infinite;
+}
+
+.brand-block h1 {
+  font-size: 26px; font-weight: 850; letter-spacing: 0.5px;
+  line-height: 1.35;
+  background: linear-gradient(135deg, var(--primary-lt), #c084fc, var(--accent-lt));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.brand-block .tagline {
+  margin-top: 4px; font-size: 13px; color: var(--text-dim); letter-spacing: 2px;
+}
+
+/* ── nickname ── */
+.nickname-wrap {
+  width: 100%; max-width: 290px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+
+.nickname-wrap .nick-label {
+  font-size: 13px; font-weight: 700; color: var(--text-dim);
+  display: flex; align-items: center; gap: 6px;
+}
+
+.nickname-row {
+  display: flex; gap: 8px;
+}
+
+.nickname-input {
+  flex: 1; height: 48px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 15px; font-weight: 600;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  font-family: var(--font-sans);
+}
+
+.nickname-input::placeholder { color: var(--text-muted); font-weight: 400; }
+.nickname-input:focus {
+  border-color: var(--primary-lt);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+}
+
+.wechat-badge-inline {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 11px; color: var(--success);
+  background: rgba(34,197,94,0.12);
+  padding: 4px 10px; border-radius: 20px;
+  white-space: nowrap; font-weight: 600;
+  animation: fadeUp 0.4s ease;
+}
+
+.start-btn {
+  width: 100%; max-width: 290px;
+  padding: 16px 0;
+  border: none; border-radius: 50px;
+  background: linear-gradient(135deg, var(--primary), #8b5cf6);
+  color: #fff; font-size: 18px; font-weight: 750; letter-spacing: 2px;
+  cursor: pointer;
+  box-shadow: 0 6px 28px rgba(99,102,241,0.35);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.start-btn:active { transform: scale(0.96); box-shadow: 0 4px 18px rgba(99,102,241,0.45); }
+
+.level-preview {
+  width: 100%; max-width: 290px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+.level-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+}
+
+.level-row .lv-icon  { font-size: 22px; flex-shrink: 0; }
+.level-row .lv-info  { flex: 1; }
+.level-row .lv-title { font-weight: 700; }
+.level-row .lv-desc  { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+.level-row .lv-tag   { font-size: 11px; color: var(--text-muted); background: var(--bg-surface); padding: 3px 10px; border-radius: 12px; white-space: nowrap; }
+
+/* ── leaderboard ── */
+.lb-section {
+  width: 100%; max-width: 290px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+.lb-header {
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.lb-header .lb-title {
+  font-size: 14px; font-weight: 750; color: var(--text-dim);
+  display: flex; align-items: center; gap: 6px;
+}
+
+.lb-header .lb-clear {
+  font-size: 11px; color: var(--text-muted);
+  background: none; border: none; cursor: pointer;
+  padding: 4px 10px; border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.lb-header .lb-clear:active { background: rgba(244,63,94,0.15); color: var(--accent); }
+
+.lb-list {
+  display: flex; flex-direction: column;
+  max-height: 220px; overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.lb-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  font-size: 13px;
+}
+
+.lb-item .lb-rank {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; flex-shrink: 0;
+}
+.lb-item .lb-rank.r1 { background: rgba(245,158,11,0.25);  color: var(--gold); }
+.lb-item .lb-rank.r2 { background: rgba(148,163,184,0.18); color: #c0c8d4; }
+.lb-item .lb-rank.r3 { background: rgba(180,130,80,0.2);   color: #d4a860; }
+.lb-item .lb-rank.rn { background: rgba(255,255,255,0.04); color: var(--text-dim); }
+
+.lb-item .lb-name  { flex: 1; font-weight: 650; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lb-item .lb-info  { text-align: right; flex-shrink: 0; }
+.lb-item .lb-info .lb-time { font-weight: 700; color: var(--primary-lt); font-family: var(--font-mono); font-size: 13px; }
+.lb-item .lb-info .lb-meta { font-size: 10px; color: var(--text-muted); }
+
+.lb-empty { text-align: center; font-size: 13px; color: var(--text-muted); padding: 20px 0; }
+
+.home-footer {
+  text-align: center; font-size: 11px; color: var(--text-muted); letter-spacing: 2px;
+  margin-top: auto; padding-top: 10px;
+}
+
+/* ============================================================
+   GAME PAGE
+   ============================================================ */
+.game-topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 4px 18px;
+}
+
+.level-badge {
+  font-size: 14px; font-weight: 700; color: var(--text-dim);
+  background: var(--bg-card); padding: 7px 16px;
+  border-radius: 22px; border: 1px solid var(--border);
+}
+
+.hearts-row { display: flex; gap: 5px; }
+.heart-icon { font-size: 24px; transition: all 0.35s ease; }
+.heart-icon.broken { opacity: 0.18; transform: scale(0.65); filter: grayscale(1); }
+
+.game-main {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 26px;
+}
+
+/* ── countdown ring ── */
+.ring-wrap { position: relative; width: 112px; height: 112px; }
+.ring-wrap svg { transform: rotate(-90deg); width: 112px; height: 112px; }
+.ring-wrap .ring-bg { fill: none; stroke: var(--bg-surface); stroke-width: 6; }
+.ring-wrap .ring-fg {
+  fill: none; stroke: var(--primary-lt); stroke-width: 6;
+  stroke-linecap: round; transition: stroke-dashoffset 0.12s linear;
+}
+.ring-text {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 34px; font-weight: 850; font-family: var(--font-mono); color: var(--primary-lt);
+}
+
+/* ── memory number ── */
+.mem-num {
+  font-size: 44px; font-weight: 900; font-family: var(--font-mono);
+  letter-spacing: 14px;
+  color: #fff;
+  text-shadow: 0 0 38px rgba(129,140,248,0.65), 0 0 70px rgba(99,102,241,0.3);
+  min-height: 56px; display: flex; align-items: center; justify-content: center;
+  animation: numPop 0.32s ease;
+}
+.mem-num.hidden { display: none; }
+
+.hint-line { font-size: 14px; color: var(--text-dim); text-align: center; min-height: 22px; }
+
+/* ── input block ── */
+.input-block { display: none; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
+.input-block.on { display: flex; }
+
+.answer-box {
+  width: 100%; max-width: 280px; height: 54px;
+  background: var(--bg-surface); border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 850; font-family: var(--font-mono);
+  letter-spacing: 8px; color: var(--text);
+}
+.answer-box .caret {
+  display: inline-block; width: 2px; height: 32px; background: var(--primary-lt);
+  animation: blinkCaret 1s step-end infinite;
+}
+
+/* ── numpad ── */
+.pad {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 10px; width: 100%; max-width: 280px;
+}
+.pad button {
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 22px; font-weight: 750;
+  cursor: pointer;
+  transition: all 0.14s ease;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.pad button:active { background: var(--primary); border-color: var(--primary-lt); transform: scale(0.92); }
+
+.pad .btn-del  { color: var(--accent); font-size: 18px; }
+.pad .btn-go   {
+  font-size: 16px; font-weight: 850; color: #fff;
+  background: var(--primary); border-color: var(--primary-lt);
+  grid-column: span 2; aspect-ratio: auto; height: 54px; letter-spacing: 2px;
+}
+
+/* ── per-question result banner ── */
+.q-result {
+  display: none; align-items: center; gap: 10px;
+  padding: 14px 20px; border-radius: var(--radius-sm);
+  font-size: 15px; font-weight: 750;
+  animation: fadeUp 0.3s ease;
+}
+.q-result.on { display: flex; }
+.q-result.correct { background: rgba(34,197,94,0.12); color: var(--success); border: 1px solid rgba(34,197,94,0.3); }
+.q-result.wrong   { background: rgba(244,63,94,0.12);  color: var(--accent);   border: 1px solid rgba(244,63,94,0.3); }
+
+/* ============================================================
+   RESULT PAGE
+   ============================================================ */
+.result-page {
+  align-items: center; padding-top: 20px; gap: 14px;
+  animation: fadeUp 0.5s ease;
+}
+
+.big-emoji { font-size: 54px; animation: float 2.6s ease-in-out infinite; }
+.title-line {
+  font-size: 20px; font-weight: 850;
+  background: linear-gradient(135deg, var(--gold), var(--accent-lt));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.share-card {
+  width: 100%;
+  background: linear-gradient(150deg, #111133, #0d0d28);
+  border: 1px solid var(--border-glow);
+  border-radius: var(--radius);
+  padding: 20px 18px;
+  display: flex; flex-direction: column; gap: 12px;
+  box-shadow: 0 12px 40px rgba(99,102,241,0.14);
+}
+
+.share-card .card-header {
+  text-align: center; font-size: 13px; font-weight: 750; color: var(--primary-lt); letter-spacing: 2px;
+}
+
+.share-card .card-player {
+  text-align: center; font-size: 15px; font-weight: 750; color: #fff;
+  padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.share-card .card-player .wx-tag {
+  display: inline-block;
+  font-size: 11px; color: var(--success); background: rgba(34,197,94,0.12);
+  padding: 2px 8px; border-radius: 8px;
+  margin-left: 6px; font-weight: 600;
+}
+
+.stats-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+}
+.stat-cell {
+  text-align: center; padding: 12px 4px;
+  background: rgba(255,255,255,0.025); border-radius: var(--radius-sm);
+}
+.stat-cell .big   { font-size: 25px; font-weight: 900; font-family: var(--font-mono); color: #fff; }
+.stat-cell .label { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+
+.rank-strip {
+  text-align: center; padding: 12px; border-radius: 26px;
+  font-size: 16px; font-weight: 800; letter-spacing: 2px;
+}
+.rank-strip.sss  { background: rgba(245,158,11,0.18);  color: var(--gold); }
+.rank-strip.ss   { background: rgba(99,102,241,0.18);   color: var(--primary-lt); }
+.rank-strip.s    { background: rgba(129,140,248,0.12);  color: #a5b4fc; }
+.rank-strip.a    { background: rgba(148,163,184,0.10);  color: var(--text-dim); }
+
+.share-card .watermark { text-align: center; font-size: 10px; color: var(--text-muted); letter-spacing: 2px; }
+
+/* ── QR code section ── */
+.qr-section {
+  width: 100%;
+  background: linear-gradient(150deg, #111133, #0d0d28);
+  border: 1px solid var(--border-glow);
+  border-radius: var(--radius);
+  padding: 20px 18px 16px;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 12px;
+  box-shadow: 0 12px 40px rgba(99,102,241,0.14);
+}
+
+.qr-section .qr-title {
+  font-size: 14px; font-weight: 750; color: var(--gold);
+  text-align: center; letter-spacing: 1px;
+}
+
+.qr-img-wrap {
+  width: 170px; height: 170px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+  padding: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.qr-img-wrap img,
+.qr-img-wrap canvas {
+  width: 100%; height: 100%;
+  display: block;
+}
+
+.qr-section .qr-hint {
+  font-size: 13px; color: var(--text-dim);
+  text-align: center; line-height: 1.6;
+}
+
+.qr-section .qr-highlight {
+  display: inline-block;
+  color: var(--accent-lt); font-weight: 750;
+  background: rgba(244,63,94,0.1);
+  padding: 3px 10px; border-radius: 12px;
+  margin-top: 4px;
+}
+
+.result-rank-snippet {
+  width: 100%; text-align: center;
+  font-size: 13px; color: var(--text-dim);
+  padding: 8px; background: rgba(245,158,11,0.06);
+  border-radius: var(--radius-sm);
+}
+
+.act-row { display: flex; gap: 10px; width: 100%; }
+.btn {
+  flex: 1; padding: 14px; border-radius: 50px; border: none;
+  font-size: 15px; font-weight: 750; cursor: pointer;
+  transition: all 0.18s ease; letter-spacing: 1px;
+  text-align: center;
+}
+.btn:active { transform: scale(0.95); }
+.btn-solid  { background: var(--primary); color: #fff; }
+.btn-ghost  { background: transparent; border: 1px solid var(--border); color: var(--text); }
+
+/* ============================================================
+   Toast
+   ============================================================ */
+.toast-overlay {
+  position: fixed; inset: 0; z-index: 200; pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.22s ease;
+}
+.toast-overlay.show { opacity: 1; }
+.toast-icon { font-size: 80px; animation: toastPop 0.55s ease; }
+
+/* ============================================================
+   Animations
+   ============================================================ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(26px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+@keyframes numPop {
+  from { opacity: 0; transform: scale(0.75); letter-spacing: 26px; }
+  to   { opacity: 1; transform: scale(1);    letter-spacing: 14px; }
+}
+@keyframes blinkCaret {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+@keyframes toastPop {
+  0%   { opacity: 0; transform: scale(0.25); }
+  50%  { opacity: 1; transform: scale(1.18); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  15%      { transform: translateX(-9px); }
+  35%      { transform: translateX(9px); }
+  55%      { transform: translateX(-6px); }
+  75%      { transform: translateX(6px); }
+}
+.shake { animation: shake 0.5s ease; }
+
+@media (max-width: 360px) {
+  .brand-block h1 { font-size: 21px; }
+  .mem-num { font-size: 36px; letter-spacing: 10px; }
+  .pad { gap: 8px; }
+  .pad button { font-size: 20px; }
+}
+</style>
 </head>
 <body>
-  <div id="app">
 
-    <!-- ==================== 首页 ==================== -->
-    <div id="page-home" class="page active">
-      <div class="container">
-        <div class="user-card">
-          <div class="avatar" id="avatar-text">🧠</div>
-          <div class="user-info">
-            <div class="nickname">脑力挑战者</div>
-            <div class="title-tag" id="home-title-tag">称号：过目小萌新</div>
-          </div>
-        </div>
+<div class="app" id="app">
 
-        <div class="game-intro">
-          <div class="main-title">极限工作记忆</div>
-          <div class="sub-title">30秒挑战你的脑力极限</div>
-        </div>
+  <!-- =================== HOME =================== -->
+  <div class="page home-page active" id="pg-home">
+    <div class="brand-block">
+      <span class="emoji">🧠</span>
+      <h1>社群最强大脑</h1>
+      <p class="tagline">⚡ 瞬时记忆挑战 ⚡</p>
+    </div>
 
-        <div class="stat-card">
-          <div class="stat-item">
-            <div class="stat-num" id="home-max-stage">0</div>
-            <div class="stat-label">历史最高通关</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-num" id="home-title-count">1</div>
-            <div class="stat-label">已解锁称号</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-num" id="home-total-correct">0</div>
-            <div class="stat-label">累计答对</div>
-          </div>
-        </div>
-
-        <button class="btn-primary" id="btn-start">开始挑战</button>
-        <div class="difficulty-hint">第 1 关 · 3 道题 · 约 80 字短文</div>
+    <!-- nickname -->
+    <div class="nickname-wrap">
+      <label class="nick-label" for="nickname-input">
+        💬 你的微信名称
+        <span id="wx-detect-badge" style="display:none;"></span>
+      </label>
+      <div class="nickname-row">
+        <input type="text" class="nickname-input" id="nickname-input"
+               placeholder="请输入微信昵称" maxlength="20" autocomplete="name">
+      </div>
+      <div id="nick-hint" style="display:none;font-size:11px;color:var(--text-muted);text-align:center;">
+        💡 已自动读取您上次填写的昵称
       </div>
     </div>
 
-    <!-- ==================== 记忆页 ==================== -->
-    <div id="page-memory" class="page">
-      <div class="container">
-        <div class="header-bar">
-          <div class="stage-num" id="memory-stage">第 1 关</div>
-          <div class="timer-box" id="timer-box">
-            <svg class="timer-ring" viewBox="0 0 100 100">
-              <circle class="timer-ring-bg" cx="50" cy="50" r="42"></circle>
-              <circle class="timer-ring-progress" cx="50" cy="50" r="42" id="timer-circle"></circle>
-            </svg>
-            <span class="timer-text" id="timer-text">30s</span>
-          </div>
-        </div>
+    <button class="start-btn" id="btn-start" onclick="launchGame()">开 始 挑 战</button>
 
-        <div class="story-card">
-          <div class="story-title">请在 <strong>30 秒</strong> 内记住以下内容</div>
-          <div class="story-content" id="story-text"></div>
-        </div>
-
-        <button class="btn-primary" id="btn-finish-early">记好了，直接答题</button>
-        <div class="hint-text">时间到将自动进入答题</div>
+    <div class="level-preview">
+      <div class="level-row">
+        <span class="lv-icon">🌱</span>
+        <div class="lv-info"><div class="lv-title">第 1 关</div><div class="lv-desc">5 位随机数字</div></div>
+        <span class="lv-tag">⏱ 4s</span>
+      </div>
+      <div class="level-row">
+        <span class="lv-icon">⚡</span>
+        <div class="lv-info"><div class="lv-title">第 2 关</div><div class="lv-desc">7 位随机数字</div></div>
+        <span class="lv-tag">⏱ 6s</span>
+      </div>
+      <div class="level-row">
+        <span class="lv-icon">🔥</span>
+        <div class="lv-info"><div class="lv-title">第 3 关</div><div class="lv-desc">10 位随机数字</div></div>
+        <span class="lv-tag">⏱ 9s</span>
       </div>
     </div>
 
-    <!-- ==================== 答题页 ==================== -->
-    <div id="page-quiz" class="page">
-      <div class="container">
-        <div class="progress-bar">
-          <div class="progress-fill" id="progress-fill"></div>
-        </div>
-        <div class="progress-label" id="progress-label">1 / 3</div>
-
-        <div class="question-card">
-          <div class="question-text" id="question-text"></div>
-        </div>
-
-        <div class="options-container" id="options-container"></div>
+    <!-- leaderboard -->
+    <div class="lb-section" id="lb-section">
+      <div class="lb-header">
+        <span class="lb-title">🏅 社群排行榜</span>
+        <button class="lb-clear" id="lb-clear" onclick="clearLeaderboard()">清空</button>
+      </div>
+      <div class="lb-list" id="lb-list">
+        <div class="lb-empty">还没有人挑战，快来争第一 🚀</div>
       </div>
     </div>
 
-    <!-- ==================== 结算页 ==================== -->
-    <div id="page-result" class="page">
-      <div class="container">
-        <div class="result-header">
-          <div class="result-icon" id="result-icon">🎉</div>
-          <div class="result-title" id="result-title">挑战完成</div>
-          <div class="result-score" id="result-score"></div>
-          <div class="new-title-badge" id="new-title-badge" style="display:none;"></div>
-        </div>
-
-        <div class="promo-card">
-          <div class="promo-title">🎁 参与有礼</div>
-          <div class="promo-subtitle">联系助理获取 5 元商城现金券</div>
-          <img class="qr-code" src="images/qr_code.png" alt="联系助理二维码" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
-          <div class="qr-placeholder" style="display:none;">
-            <div style="font-size:80rpx; opacity:0.3;">📱</div>
-            <div style="color:#999;margin-top:8px;">请将二维码放入 images/qr_code.png</div>
-          </div>
-          <div class="promo-tips">长按识别或截图保存二维码</div>
-        </div>
-
-        <button class="btn-primary" id="btn-next">进入下一关</button>
-        <button class="btn-secondary" id="btn-retry">再次挑战</button>
-        <button class="btn-outline" id="btn-share">📤 分享给朋友</button>
-        <button class="btn-text" id="btn-home">返回首页</button>
-      </div>
-    </div>
-
-    <!-- ==================== 分享引导浮层 ==================== -->
-    <div id="share-overlay" class="share-overlay" style="display:none;">
-      <div class="share-arrow"></div>
-      <div class="share-text">点击右上角 ⋯<br>分享给朋友</div>
-    </div>
-
+    <p class="home-footer">❤️ 共 3 颗心 · 答错重试本关</p>
   </div>
 
-  <script src="js/quizBank.js"></script>
-  <script src="js/game.js"></script>
+  <!-- =================== GAME =================== -->
+  <div class="page" id="pg-game">
+    <div class="game-topbar">
+      <div class="level-badge" id="badge-level">第 1/3 关</div>
+      <div class="hearts-row" id="hearts-row">
+        <span class="heart-icon">❤️</span>
+        <span class="heart-icon">❤️</span>
+        <span class="heart-icon">❤️</span>
+      </div>
+    </div>
+
+    <div class="game-main">
+      <div class="ring-wrap" id="ring-wrap">
+        <svg viewBox="0 0 112 112">
+          <circle class="ring-bg" cx="56" cy="56" r="50"/>
+          <circle class="ring-fg"  id="ring-fg" cx="56" cy="56" r="50"
+                  stroke-dasharray="314.159" stroke-dashoffset="0"/>
+        </svg>
+        <div class="ring-text" id="ring-txt">3</div>
+      </div>
+
+      <div class="mem-num" id="mem-num"></div>
+      <p class="hint-line" id="hint-line">准备好了吗？</p>
+
+      <div class="input-block" id="input-block">
+        <div class="answer-box">
+          <span id="ans-text"></span><span class="caret" id="caret"></span>
+        </div>
+        <div class="pad" id="pad">
+          <button data-key="1">1</button>
+          <button data-key="2">2</button>
+          <button data-key="3">3</button>
+          <button data-key="4">4</button>
+          <button data-key="5">5</button>
+          <button data-key="6">6</button>
+          <button data-key="7">7</button>
+          <button data-key="8">8</button>
+          <button data-key="9">9</button>
+          <button class="btn-del" data-key="del">⌫</button>
+          <button data-key="0">0</button>
+          <button class="btn-go" data-key="go">确 定</button>
+        </div>
+      </div>
+
+      <div class="q-result" id="q-result"></div>
+    </div>
+  </div>
+
+  <!-- =================== RESULT =================== -->
+  <div class="page result-page" id="pg-result">
+    <div class="big-emoji" id="res-icon"></div>
+    <div class="title-line" id="res-title"></div>
+
+    <!-- share card -->
+    <div class="share-card" id="share-card">
+      <div class="card-header">🏆 战 绩 卡 片 🏆</div>
+      <div class="card-player" id="card-player"></div>
+      <div class="stats-row">
+        <div class="stat-cell"><div class="big" id="st-levels">--</div><div class="label">通关</div></div>
+        <div class="stat-cell"><div class="big" id="st-accuracy">--</div><div class="label">正确率</div></div>
+        <div class="stat-cell"><div class="big" id="st-time">--</div><div class="label">总耗时</div></div>
+      </div>
+      <div class="rank-strip" id="rank-strip"></div>
+      <div class="watermark">社群最强大脑 · 瞬时记忆挑战</div>
+    </div>
+
+    <!-- QR code section -->
+    <div class="qr-section" id="qr-section">
+      <div class="qr-title">🎁 参与有礼</div>
+      <div class="qr-img-wrap" id="qr-img-wrap">
+        <img id="qr-img" src="qrcode.jpg" alt="扫码联系助理"
+             style="display:none;"
+             onerror="handleQrError()">
+        <canvas id="qr-canvas" width="154" height="154" style="display:none;"></canvas>
+        <div id="qr-placeholder" style="color:var(--text-muted);font-size:13px;text-align:center;line-height:1.5;">
+          📷<br>请将二维码图片<br>保存为 <b>qrcode.jpg</b><br>放入项目文件夹
+        </div>
+      </div>
+      <div class="qr-hint">
+        感谢参与脑力游戏<br>
+        <span class="qr-highlight">联系助理获取 5 元商城现金券</span>
+      </div>
+    </div>
+
+    <div class="result-rank-snippet" id="rank-snippet"></div>
+
+    <div class="act-row">
+      <button class="btn btn-ghost" onclick="goHome()">🏠 返回</button>
+      <button class="btn btn-solid" onclick="retryGame()">🔄 再来一局</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- toast -->
+<div class="toast-overlay" id="toast-overlay">
+  <div class="toast-icon" id="toast-icon"></div>
+</div>
+
+<script>
+;(function() {
+  /* ==========================================================
+     Constants
+     ========================================================== */
+  var LEVELS = [
+    { id: 1, name: '第 1 关', digits: 5,  time: 4000,  icon: '🌱' },
+    { id: 2, name: '第 2 关', digits: 7,  time: 6000,  icon: '⚡' },
+    { id: 3, name: '第 3 关', digits: 10, time: 9000,  icon: '🔥' },
+  ];
+
+  var TOTAL_LEVELS = LEVELS.length;
+  var MAX_LIVES    = 3;
+  var READY_SEC    = 3;
+  var RING_CIRCUM  = 2 * Math.PI * 50;
+  var STORAGE_KEY  = 'memory_game_leaderboard_v2';
+  var NICK_KEY     = 'memory_game_nickname';
+  var COOKIE_KEY   = 'mg_nick';
+
+  /* ==========================================================
+     Cookie helpers (backup for localStorage)
+     ========================================================== */
+  function setCookie(name, value, days) {
+    var d = new Date();
+    d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+    document.cookie = name + '=' + encodeURIComponent(value) +
+      ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
+  }
+
+  function getCookie(name) {
+    var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? decodeURIComponent(match[2]) : null;
+  }
+
+  /* ==========================================================
+     WeChat detection
+     ========================================================== */
+  var ua = navigator.userAgent.toLowerCase();
+  var isWeChat = ua.indexOf('micromessenger') !== -1;
+
+  /* ==========================================================
+     State
+     ========================================================== */
+  var state = {
+    playerName: '',
+    currentLevelIdx: 0,
+    lives: MAX_LIVES,
+    cleared: 0,
+    currentNumber: '',
+    userInput: '',
+    isInputPhase: false,
+    gameStartTs: 0,
+    totalTimeMs: 0,
+    questionStartTs: 0,
+    levelAttempts: [],
+    questionsAnswered: 0,
+    questionsCorrect: 0,
+    animId: 0,
+    timerId: 0,
+  };
+
+  /* ==========================================================
+     DOM cache
+     ========================================================== */
+  var $ = function(s) { return document.querySelector(s); };
+
+  var pgHome   = $('#pg-home');
+  var pgGame   = $('#pg-game');
+  var pgResult = $('#pg-result');
+
+  var nicknameInput  = $('#nickname-input');
+  var wxDetectBadge  = $('#wx-detect-badge');
+
+  var badgeLevel  = $('#badge-level');
+  var heartsRow   = $('#hearts-row');
+  var ringWrap    = $('#ring-wrap');
+  var ringFg      = $('#ring-fg');
+  var ringTxt     = $('#ring-txt');
+  var memNum      = $('#mem-num');
+  var hintLine    = $('#hint-line');
+  var inputBlock  = $('#input-block');
+  var ansText     = $('#ans-text');
+  var caretEl     = $('#caret');
+  var padEl       = $('#pad');
+  var qResult     = $('#q-result');
+
+  var resIcon      = $('#res-icon');
+  var resTitle     = $('#res-title');
+  var cardPlayer   = $('#card-player');
+  var stLevels     = $('#st-levels');
+  var stAccuracy   = $('#st-accuracy');
+  var stTime       = $('#st-time');
+  var rankStrip    = $('#rank-strip');
+  var rankSnippet  = $('#rank-snippet');
+
+  // QR
+  var qrImg        = $('#qr-img');
+  var qrCanvas     = $('#qr-canvas');
+  var qrPlaceholder = $('#qr-placeholder');
+
+  var toastOverlay = $('#toast-overlay');
+  var toastIcon    = $('#toast-icon');
+  var lbList       = $('#lb-list');
+
+  /* ==========================================================
+     Leaderboard (localStorage)
+     ========================================================== */
+  function loadLeaderboard() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) { return []; }
+  }
+
+  function saveLeaderboard(records) {
+    records.sort(function(a, b) {
+      if (a.cleared !== b.cleared) return b.cleared - a.cleared;
+      if (a.accuracy !== b.accuracy) return b.accuracy - a.accuracy;
+      return a.timeMs - b.timeMs;
+    });
+    var top = records.slice(0, 50);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(top));
+    } catch (e) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(top.slice(0, 20)));
+    }
+    return top;
+  }
+
+  function addRecord(rec) {
+    var records = loadLeaderboard();
+    records.push(rec);
+    saveLeaderboard(records);
+    renderLeaderboard();
+  }
+
+  window.clearLeaderboard = function() {
+    if (confirm('确定要清空排行榜吗？此操作不可撤销。')) {
+      localStorage.removeItem(STORAGE_KEY);
+      renderLeaderboard();
+    }
+  };
+
+  function renderLeaderboard() {
+    var records = loadLeaderboard();
+    if (!records.length) {
+      lbList.innerHTML = '<div class="lb-empty">还没有人挑战，快来争第一 🚀</div>';
+      return;
+    }
+    var html = '';
+    for (var i = 0; i < records.length; i++) {
+      var r = records[i];
+      var rankClass = i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : 'rn';
+      var rankIcon = i === 0 ? '👑' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+      html += '<div class="lb-item">' +
+        '<div class="lb-rank ' + rankClass + '">' + rankIcon + '</div>' +
+        '<div class="lb-name">' + escHtml(r.name) + '</div>' +
+        '<div class="lb-info">' +
+          '<div class="lb-time">' + formatMs(r.timeMs) + '</div>' +
+          '<div class="lb-meta">' + r.cleared + '关 · ' + r.accuracy + '% · ' + r.date + '</div>' +
+        '</div>' +
+      '</div>';
+    }
+    lbList.innerHTML = html;
+  }
+
+  function escHtml(s) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(s));
+    return div.innerHTML;
+  }
+
+  /* ==========================================================
+     Page helpers
+     ========================================================== */
+  function switchPage(page) {
+    pgHome.classList.remove('active');
+    pgGame.classList.remove('active');
+    pgResult.classList.remove('active');
+    page.classList.add('active');
+  }
+
+  /* ==========================================================
+     Toast
+     ========================================================== */
+  function flashToast(emoji) {
+    toastIcon.textContent = emoji;
+    toastOverlay.classList.add('show');
+    clearTimeout(state._toastTid);
+    state._toastTid = setTimeout(function() {
+      toastOverlay.classList.remove('show');
+    }, 620);
+  }
+
+  /* ==========================================================
+     Hearts
+     ========================================================== */
+  function renderHearts() {
+    var h = '';
+    for (var i = 0; i < MAX_LIVES; i++) {
+      h += '<span class="heart-icon' + (i >= state.lives ? ' broken' : '') + '">❤️</span>';
+    }
+    heartsRow.innerHTML = h;
+  }
+
+  /* ==========================================================
+     Random digit string
+     ========================================================== */
+  function randNum(len) {
+    var s = '';
+    for (var i = 0; i < len; i++) s += Math.floor(Math.random() * 10);
+    return s;
+  }
+
+  /* ==========================================================
+     QR code - try local image, fallback to canvas generation
+     ========================================================== */
+  var qrImageOk = false;
+
+  function initQrCode() {
+    // Reset
+    qrImg.style.display = 'none';
+    qrCanvas.style.display = 'none';
+    qrPlaceholder.style.display = 'none';
+
+    if (qrImageOk) {
+      // Image loaded successfully earlier
+      qrImg.style.display = 'block';
+      return;
+    }
+
+    // Try local image
+    qrImg.style.display = 'block';
+    qrPlaceholder.style.display = 'none';
+  }
+
+  window.handleQrError = function() {
+    // Local qrcode.png failed to load → generate via canvas
+    qrImg.style.display = 'none';
+    qrPlaceholder.style.display = 'none';
+    generateQrCanvas();
+  };
+
+  function generateQrCanvas() {
+    // Generate fallback — try qrcode.jpg then qrcode.png
+    var formats = ['qrcode.jpg', 'qrcode.png'];
+    tryFormat(0);
+
+    function tryFormat(idx) {
+      if (idx >= formats.length) {
+        // All failed
+        qrCanvas.style.display = 'none';
+        qrPlaceholder.style.display = 'block';
+        qrPlaceholder.innerHTML = '📷<br>请将二维码图片<br>保存为 <b>qrcode.jpg</b><br>放入项目文件夹';
+        return;
+      }
+      var img = new Image();
+      img.onload = function() {
+        var ctx = qrCanvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, 154, 154);
+        ctx.drawImage(img, 0, 0, 154, 154);
+        qrCanvas.style.display = 'block';
+      };
+      img.onerror = function() { tryFormat(idx + 1); };
+      img.src = formats[idx];
+    }
+  }
+
+  function preCheckQrImage() {
+    var formats = ['qrcode.jpg', 'qrcode.png'];
+    tryCheck(0);
+
+    function tryCheck(idx) {
+      if (idx >= formats.length) {
+        qrImageOk = false;
+        return;
+      }
+      var img = new Image();
+      img.onload = function() {
+        qrImageOk = true;
+        // Update the visible img element src to the working format
+        qrImg.src = formats[idx];
+      };
+      img.onerror = function() { tryCheck(idx + 1); };
+      img.src = formats[idx];
+    }
+  }
+
+  /* ==========================================================
+     Launch / Retry
+     ========================================================== */
+  window.launchGame = function() {
+    var name = nicknameInput.value.trim();
+    if (!name) {
+      nicknameInput.focus();
+      nicknameInput.style.borderColor = 'var(--accent)';
+      nicknameInput.style.boxShadow = '0 0 0 3px rgba(244,63,94,0.2)';
+      setTimeout(function() {
+        nicknameInput.style.borderColor = '';
+        nicknameInput.style.boxShadow = '';
+      }, 1500);
+      return;
+    }
+
+    // persist nickname to both localStorage + cookie
+    try { localStorage.setItem(NICK_KEY, name); } catch (e) {}
+    setCookie(COOKIE_KEY, name, 365);
+
+    state.playerName        = name;
+    state.currentLevelIdx   = 0;
+    state.lives             = MAX_LIVES;
+    state.cleared           = 0;
+    state.totalTimeMs       = 0;
+    state.levelAttempts     = [];
+    state.questionsAnswered = 0;
+    state.questionsCorrect  = 0;
+    state.gameStartTs       = Date.now();
+
+    renderHearts();
+    switchPage(pgGame);
+    loadLevel();
+  };
+
+  window.retryGame = function() {
+    window.launchGame();
+  };
+
+  window.goHome = function() {
+    cancelAnimationFrame(state.animId);
+    clearTimeout(state.timerId);
+    renderLeaderboard();
+    switchPage(pgHome);
+  };
+
+  /* ==========================================================
+     Level loading
+     ========================================================== */
+  function loadLevel() {
+    var lv = LEVELS[state.currentLevelIdx];
+    state.isInputPhase   = false;
+    state.userInput      = '';
+    state.currentNumber  = randNum(lv.digits);
+
+    badgeLevel.textContent = '第 ' + lv.id + '/3 关';
+
+    memNum.classList.remove('hidden');
+    memNum.style.animation = 'none';
+    void memNum.offsetWidth;
+    memNum.style.animation = 'numPop 0.32s ease';
+    memNum.textContent = '';
+
+    ringWrap.style.display = '';
+    ringFg.style.strokeDashoffset = '0';
+    ringFg.style.stroke = 'var(--primary-lt)';
+
+    inputBlock.classList.remove('on');
+    qResult.classList.remove('on');
+    hintLine.textContent = '准备好了吗？';
+
+    ansText.textContent = '';
+    caretEl.style.display = 'none';
+
+    runCountdown(lv.time, lv.digits);
+  }
+
+  /* ==========================================================
+     Countdown + memorise
+     ========================================================== */
+  function runCountdown(memoriseMs, digitCount) {
+    var totalMs  = READY_SEC * 1000 + memoriseMs;
+    var startTs  = Date.now();
+    var phase    = 'ready';
+
+    cancelAnimationFrame(state.animId);
+
+    function frame() {
+      var elapsed   = Date.now() - startTs;
+      var remaining = Math.max(0, totalMs - elapsed);
+      var progress  = 1 - (remaining / totalMs);
+
+      ringFg.style.strokeDashoffset = (RING_CIRCUM * (1 - progress)).toFixed(2);
+
+      if (phase === 'ready' && elapsed >= READY_SEC * 1000) {
+        phase = 'show';
+        memNum.textContent = state.currentNumber;
+        hintLine.textContent = '记住这 ' + digitCount + ' 位数字！';
+        ringFg.style.stroke = '#f59e0b';
+      }
+
+      if (phase === 'show' && elapsed >= totalMs) {
+        phase = 'input';
+        memNum.classList.add('hidden');
+        ringWrap.style.display = 'none';
+        hintLine.textContent = '请输入你记住的数字';
+        inputBlock.classList.add('on');
+        state.isInputPhase = true;
+        state.questionStartTs = Date.now();
+        caretEl.style.display = 'inline-block';
+        return;
+      }
+
+      if (phase === 'ready') {
+        ringTxt.textContent = Math.ceil((READY_SEC * 1000 - elapsed) / 1000);
+      } else if (phase === 'show') {
+        ringTxt.textContent = Math.max(0, (totalMs - elapsed) / 1000).toFixed(1);
+      }
+
+      state.animId = requestAnimationFrame(frame);
+    }
+
+    ringTxt.textContent = READY_SEC;
+    state.animId = requestAnimationFrame(frame);
+  }
+
+  /* ==========================================================
+     Input handling
+     ========================================================== */
+  function pushDigit(d) {
+    if (!state.isInputPhase) return;
+    var max = LEVELS[state.currentLevelIdx].digits;
+    if (state.userInput.length >= max) return;
+    state.userInput += d;
+    ansText.textContent = state.userInput;
+  }
+
+  function popDigit() {
+    if (!state.isInputPhase) return;
+    state.userInput = state.userInput.slice(0, -1);
+    ansText.textContent = state.userInput;
+  }
+
+  padEl.addEventListener('click', function(e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    var key = btn.getAttribute('data-key');
+    if (!key) return;
+    if (key === 'del') { popDigit(); }
+    else if (key === 'go') { handleSubmit(); }
+    else { pushDigit(key); }
+  });
+
+  padEl.addEventListener('touchstart', function(e) {
+    if (e.target.closest('button')) { e.preventDefault(); e.target.closest('button').click(); }
+  }, { passive: false });
+
+  document.addEventListener('keydown', function(e) {
+    if (!state.isInputPhase) return;
+    if (e.key >= '0' && e.key <= '9') pushDigit(e.key);
+    else if (e.key === 'Backspace' || e.key === 'Delete') popDigit();
+    else if (e.key === 'Enter') handleSubmit();
+  });
+
+  /* ==========================================================
+     Submit
+     ========================================================== */
+  window.handleSubmit = function() {
+    if (!state.isInputPhase) return;
+    if (state.userInput.length === 0) {
+      inputBlock.classList.add('shake');
+      setTimeout(function() { inputBlock.classList.remove('shake'); }, 500);
+      return;
+    }
+
+    state.isInputPhase = false;
+    caretEl.style.display = 'none';
+
+    var timeTaken  = Date.now() - state.questionStartTs;
+    var isCorrect  = state.userInput === state.currentNumber;
+    state.questionsAnswered++;
+
+    qResult.classList.add('on');
+    if (isCorrect) {
+      state.questionsCorrect++;
+      state.levelAttempts.push(timeTaken);
+      qResult.className = 'q-result on correct';
+      qResult.innerHTML = '✅ 回答正确！ 用时 <b>' + formatMs(timeTaken) + '</b>';
+      flashToast('✅');
+    } else {
+      qResult.className = 'q-result on wrong';
+      qResult.innerHTML = '❌ 回答错误！ 用时 <b>' + formatMs(timeTaken) + '</b>';
+      flashToast('💔');
+      inputBlock.classList.add('shake');
+      setTimeout(function() { inputBlock.classList.remove('shake'); }, 500);
+    }
+
+    clearTimeout(state.timerId);
+    state.timerId = setTimeout(function() {
+      qResult.classList.remove('on');
+      inputBlock.classList.remove('on');
+
+      if (isCorrect) {
+        state.cleared++;
+        state.currentLevelIdx++;
+        if (state.currentLevelIdx >= TOTAL_LEVELS) {
+          endGame();
+        } else {
+          loadLevel();
+        }
+      } else {
+        state.lives--;
+        renderHearts();
+        if (state.lives <= 0) {
+          endGame();
+        } else {
+          loadLevel();
+        }
+      }
+    }, 1000);
+  };
+
+  /* ==========================================================
+     End game
+     ========================================================== */
+  function endGame() {
+    cancelAnimationFrame(state.animId);
+    clearTimeout(state.timerId);
+
+    state.totalTimeMs = Date.now() - state.gameStartTs;
+
+    var clearedOutOf = state.cleared + '/' + TOTAL_LEVELS;
+    var accuracy     = state.questionsAnswered === 0 ? 0
+                     : Math.round((state.questionsCorrect / state.questionsAnswered) * 100);
+
+    // ── rank ──
+    var icon, title, rankClass, rankLabel;
+    if (state.cleared === TOTAL_LEVELS) {
+      icon = '🏆'; title = '闪电大脑 · 至尊段位'; rankClass = 'sss'; rankLabel = '🏆 闪电大脑';
+    } else if (state.cleared === 2) {
+      icon = '🥇'; title = '记忆达人 · 钻石段位'; rankClass = 'ss';  rankLabel = '🥇 记忆达人';
+    } else if (state.cleared === 1) {
+      icon = '🥈'; title = '记忆新星 · 黄金段位'; rankClass = 's';   rankLabel = '🥈 记忆新星';
+    } else {
+      icon = '💪'; title = '继续努力 · 再接再厉'; rankClass = 'a';   rankLabel = '💪 继续努力';
+    }
+
+    // ── populate ──
+    resIcon.textContent    = icon;
+    resTitle.textContent   = title;
+    cardPlayer.innerHTML   = '👤 ' + escHtml(state.playerName) + '<span class="wx-tag">微信</span>';
+    stLevels.textContent   = clearedOutOf;
+    stAccuracy.textContent = accuracy + '%';
+    stTime.textContent     = formatMs(state.totalTimeMs);
+    rankStrip.textContent  = rankLabel;
+    rankStrip.className    = 'rank-strip ' + rankClass;
+
+    // ── init QR code ──
+    initQrCode();
+
+    // ── save record ──
+    var now = new Date();
+    var dateStr = (now.getMonth() + 1) + '/' + now.getDate() + ' ' +
+                  pad2(now.getHours()) + ':' + pad2(now.getMinutes());
+    addRecord({
+      name: state.playerName,
+      cleared: state.cleared,
+      accuracy: accuracy,
+      timeMs: state.totalTimeMs,
+      date: dateStr,
+      ts: now.getTime(),
+    });
+
+    // ── rank snippet ──
+    var all = loadLeaderboard();
+    var myIdx = -1;
+    for (var i = 0; i < all.length; i++) {
+      if (all[i].ts === now.getTime() && all[i].name === state.playerName &&
+          all[i].cleared === state.cleared && all[i].timeMs === state.totalTimeMs) {
+        myIdx = i;
+        break;
+      }
+    }
+    if (myIdx >= 0) {
+      rankSnippet.textContent = '📊 当前排名：第 ' + (myIdx + 1) + ' 名（共 ' + all.length + ' 人参与）';
+    } else {
+      rankSnippet.textContent = '📊 战绩已记录！';
+    }
+
+    switchPage(pgResult);
+  }
+
+  /* ==========================================================
+     Helpers
+     ========================================================== */
+  function formatMs(ms) {
+    var sec = (ms / 1000).toFixed(1);
+    if (+sec < 60) return sec + 's';
+    var m = Math.floor(+sec / 60);
+    var s = Math.round(+sec % 60);
+    return m + 'm' + s + 's';
+  }
+
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+
+  /* ==========================================================
+     Init
+     ========================================================== */
+  function init() {
+    // ── WeChat detection ──
+    if (isWeChat) {
+      wxDetectBadge.style.display = 'inline-flex';
+      wxDetectBadge.className = 'wechat-badge-inline';
+      wxDetectBadge.textContent = '✅ 已在微信中';
+      nicknameInput.placeholder = '点击输入你的微信昵称';
+    }
+
+    // ── Restore nickname (localStorage first, then cookie) ──
+    var savedNick = '';
+    try { savedNick = localStorage.getItem(NICK_KEY) || ''; } catch (e) {}
+    if (!savedNick) { savedNick = getCookie(COOKIE_KEY) || ''; }
+    if (savedNick) {
+      nicknameInput.value = savedNick;
+      // sync between storage
+      try { localStorage.setItem(NICK_KEY, savedNick); } catch (e) {}
+      setCookie(COOKIE_KEY, savedNick, 365);
+      // show auto-fill hint
+      var nickHint = document.getElementById('nick-hint');
+      if (nickHint) {
+        nickHint.style.display = 'block';
+        nickHint.textContent = '💡 已自动读取：' + savedNick;
+      }
+    }
+
+    // ── Pre-check QR image ──
+    preCheckQrImage();
+
+    renderLeaderboard();
+
+    document.getElementById('btn-start').addEventListener('touchstart', function(e) {
+      e.preventDefault(); this.click();
+    }, { passive: false });
+  }
+
+  init();
+
+})();
+</script>
+
 </body>
 </html>
