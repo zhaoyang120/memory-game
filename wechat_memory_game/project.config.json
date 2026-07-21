@@ -1,0 +1,13 @@
+{
+  "miniprogramRoot": "miniprogram/",
+  "setting": {
+    "urlCheck": true,
+    "es6": true,
+    "enhanceCondition": true,
+    "postcss": true,
+    "minified": true
+  },
+  "appid": "wx1234567890abcdef",
+  "projectname": "极限工作记忆",
+  "libVersion": "2.19.4"
+}

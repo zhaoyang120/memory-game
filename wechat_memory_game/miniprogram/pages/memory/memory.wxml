@@ -1,0 +1,15 @@
+<view class="container">
+  <view class="header-bar">
+    <view class="stage-num">第 {{stage}} 关</view>
+    <view class="timer-box {{timeLeft <= 5 ? 'warning' : ''}}">
+      ⏱ {{timeLeft}}s
+    </view>
+  </view>
+
+  <view class="story-card">
+    <view class="story-title">请在 30 秒内记住以下内容</view>
+    <text class="story-content">{{storyText}}</text>
+  </view>
+
+  <button class="btn-primary" bindtap="finishEarly">记好了，直接答题</button>
+</view>

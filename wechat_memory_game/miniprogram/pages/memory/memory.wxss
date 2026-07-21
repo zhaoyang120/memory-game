@@ -1,0 +1,28 @@
+.header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 30rpx;
+}
+.stage-num { font-size: 36rpx; font-weight: bold; color: #333; }
+.timer-box {
+  background: #EBF3FF;
+  color: #4A90E2;
+  font-size: 36rpx;
+  font-weight: bold;
+  padding: 12rpx 30rpx;
+  border-radius: 40rpx;
+}
+.timer-box.warning { background: #FFE5E5; color: #FF3B30; }
+.story-card {
+  background: #FFFFFF;
+  width: 100%;
+  border-radius: 24rpx;
+  padding: 40rpx;
+  box-shadow: 0 6rpx 20rpx rgba(0,0,0,0.06);
+  margin-bottom: 50rpx;
+  min-height: 380rpx;
+}
+.story-title { font-size: 28rpx; color: #999; margin-bottom: 30rpx; text-align: center; }
+.story-content { font-size: 34rpx; line-height: 1.8; color: #2C3E50; text-align: justify; }

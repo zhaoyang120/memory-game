@@ -1,0 +1,16 @@
+<view class="container">
+  <view class="progress-bar">进度：{{currentIndex + 1}} / {{totalQuestions}}</view>
+
+  <view class="question-card">
+    <view class="question-text">{{currentQuestion.questionText}}</view>
+  </view>
+
+  <view class="options-container">
+    <block wx:for="{{currentQuestion.options}}" wx:key="index">
+      <view class="option-btn {{selectedOption === item ? (item === currentQuestion.correctAnswer ? 'correct' : 'wrong') : ''}}"
+            bindtap="selectOption" data-option="{{item}}">
+        {{item}}
+      </view>
+    </block>
+  </view>
+</view>

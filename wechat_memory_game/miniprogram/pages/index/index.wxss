@@ -1,0 +1,47 @@
+.user-card {
+  display: flex;
+  align-items: center;
+  background: #FFFFFF;
+  width: 100%;
+  padding: 30rpx;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.05);
+  margin-bottom: 40rpx;
+}
+.avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 60rpx;
+  background: #EEE;
+  margin-right: 30rpx;
+}
+.nickname {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+.title-tag {
+  display: inline-block;
+  font-size: 24rpx;
+  color: #FF9500;
+  background: #FFF5E6;
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+  margin-top: 10rpx;
+}
+.game-intro { text-align: center; margin: 40rpx 0; }
+.main-title { font-size: 52rpx; font-weight: 900; color: #1A2B4C; }
+.sub-title { font-size: 28rpx; color: #8E9AAF; margin-top: 10rpx; }
+.stat-card {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  padding: 30rpx;
+  margin-bottom: 50rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.05);
+}
+.stat-item { text-align: center; }
+.stat-num { font-size: 48rpx; font-weight: bold; color: #4A90E2; }
+.stat-label { font-size: 24rpx; color: #666; margin-top: 8rpx; }

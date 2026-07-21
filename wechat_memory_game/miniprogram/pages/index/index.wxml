@@ -1,0 +1,28 @@
+<view class="container">
+  <view class="user-card">
+    <image class="avatar" src="{{userInfo.avatarUrl || '/images/default_avatar.png'}}" mode="aspectFill"></image>
+    <view class="user-info">
+      <view class="nickname">{{userInfo.nickName || '脑力挑战者'}}</view>
+      <view class="title-tag">称号：{{equippedTitle}}</view>
+    </view>
+  </view>
+
+  <view class="game-intro">
+    <view class="main-title">极限工作记忆</view>
+    <view class="sub-title">30秒挑战你的脑力极限</view>
+  </view>
+
+  <view class="stat-card">
+    <view class="stat-item">
+      <view class="stat-num">{{maxStage}}</view>
+      <view class="stat-label">历史最高通关</view>
+    </view>
+    <view class="stat-item">
+      <view class="stat-num">{{unlockedTitles.length}}</view>
+      <view class="stat-label">已解锁称号</view>
+    </view>
+  </view>
+
+  <button class="btn-primary" bindtap="startGame">开始挑战</button>
+  <button class="btn-secondary" bindtap="showLeaderboard">排行榜</button>
+</view>

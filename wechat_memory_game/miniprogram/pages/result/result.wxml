@@ -1,0 +1,21 @@
+<view class="container">
+  <view class="result-header">
+    <view class="result-title">挑战完成</view>
+    <view class="result-score">本次答对 {{correctCount}} / {{totalCount}} 题</view>
+    <view wx:if="{{newTitle}}" class="new-title-badge">
+      🎉 解锁新称号：【{{newTitle}}】
+    </view>
+  </view>
+
+  <view class="promo-card">
+    <view class="promo-title">🎁 参与有礼</view>
+    <view class="promo-subtitle">联系助理获取 5 元商城现金券</view>
+    <image class="qr-code" src="/images/qr_code.png" mode="widthFix" show-menu-by-longpress></image>
+    <view class="promo-tips">长按识别或截图保存二维码</view>
+  </view>
+
+  <button class="btn-primary" bindtap="nextOrRetry">
+    {{correctCount === totalCount ? '进入下一关' : '再次挑战'}}
+  </button>
+  <button class="btn-secondary" bindtap="goHome">返回首页</button>
+</view>
