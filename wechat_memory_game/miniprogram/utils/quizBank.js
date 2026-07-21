@@ -484,6 +484,18 @@ var quizBank = {
 };
 
 /**
+ * Fisher-Yates 洗牌
+ */
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+
+/**
  * 根据关卡获取随机题目
  * @param {number} stage - 当前关卡数
  * @returns {object} - { stageId, storyText, questions }
@@ -511,10 +523,20 @@ function getRandomQuiz(stage) {
   var randomIndex = Math.floor(Math.random() * pool.length);
   var quiz = pool[randomIndex];
 
+  // 每道题的选项随机打乱
+  var questions = quiz.questions.slice(0, questionCount).map(function (q) {
+    return {
+      questionId: q.questionId,
+      questionText: q.questionText,
+      options: shuffle(q.options),
+      correctAnswer: q.correctAnswer
+    };
+  });
+
   return {
     stageId: stage,
     storyText: quiz.storyText,
-    questions: quiz.questions.slice(0, questionCount)
+    questions: questions
   };
 }
 
