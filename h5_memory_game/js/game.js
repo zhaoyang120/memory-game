@@ -107,9 +107,6 @@
 
   // ==================== 首页 UI 更新 ====================
   function updateHomeUI() {
-    $('s-max-stage').textContent = state.maxStage;
-    $('s-title-count').textContent = state.unlockedTitles.length;
-    $('s-total-correct').textContent = state.totalCorrect;
     $('home-title-badge').textContent = '🏅 ' + state.equippedTitle;
   }
 
